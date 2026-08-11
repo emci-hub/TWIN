@@ -11,6 +11,8 @@
   `openness, conscientiousness, extraversion, agreeableness, neuroticism · risk_tolerance, analytical_detail, ambiguity_tolerance · verbosity, directness, formality, humor_dryness`
 - **Twin output is always hedged, confidence-gated, disclaimed.** Never "this is exactly you," never clinical language. Dimensions below confidence 0.35 are omitted from the twin prompt entirely.
 - **Consent rule:** a twin may only be built from data the profiled person explicitly authorized — themselves, or an opt-in invite they accepted. No arbitrary-target scanning, ever, regardless of whether the source is public.
+- **Evidence Gate:** every input — quiz, writing sample, mini-game, party game, anything added later — is converted to the same shape (`{dim, direction, strength}`) and must pass through `/core/evidence-gate` before it can touch alpha/beta. The gate checks a registry (`/core/evidence-sources.json`) for that source's `trust_tier` (max strength it's allowed) and `feeds_profile` (whether it's allowed to touch the profile at all). **New sources default to `feeds_profile: false`** — a game only ever affects the profile if someone deliberately registers it with a tier, never by default. This is what stops a casual/party game from moving someone's traits. See `docs/ARCHITECTURE.md` for the full flow and the current tier table.
+- **Profile freeze:** a user can freeze their profile so nothing — including gate-approved sources — moves it further.
 - **Folders:** `/core` (logic + tests) · `/api` · `/web` · `/ios` (later) · `/validation` · `/docs`
 
 ## What gets stored per user (reference)
@@ -24,7 +26,7 @@ metadata: {items_answered, profile_confidence, min_items_for_twin: 12}
 ## Social-signal evidence (Phase 5b, post-MVP)
 
 A social-derived signal is just another evidence source feeding the same alpha/beta
-engine — never a separate scoring path.
+engine through the Evidence Gate above — never a separate scoring path.
 
 ```
 { source: "social_text", dim, direction: "+"|"-", strength: "weak"|"moderate" }
