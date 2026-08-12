@@ -119,6 +119,7 @@ Give complete files.
 ---
 
 ## Phase 4 — Twin compiler ⭐
+✅ Done. `/core/content/twin-copy.json` (hedge phrases, disclaimer, intro/outro), `/core/twin-compiler.ts` (0.35 confidence gate, hedge-band selection, a runtime banned-word guard on top of the tests). 11 new tests (42 total), all green.
 
 Turns a profile into the twin's persona prompt. Hedged, disclaimed, never claims to be the real person.
 
