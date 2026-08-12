@@ -12,7 +12,7 @@ screens — it's the real product; everything else is a face on it.
 | 2 | Scoring engine ⭐ + Evidence Gate (see `docs/ARCHITECTURE.md`) | ✅ done |
 | 3 | Question delivery (Quick Start + sharpen batches) | ✅ done |
 | 4 | Twin compiler ⭐ | ✅ done |
-| 5 | API (twin chat via swappable provider adapter: Anthropic / OpenRouter) | pending |
+| 5 | API (twin chat via swappable provider adapter: Anthropic / OpenRouter) | ✅ done |
 | 6 | Web app (ports `docs/mockup.html` — quiz, results, "why", twin chat, Home) | pending |
 | 7 | Deploy | pending |
 

@@ -138,6 +138,7 @@ Give complete files.
 ---
 
 ## Phase 5 — API
+✅ Done. `/api/config.ts`, `/api/quota-guard.ts`, `/api/llm/{anthropic,openrouter,mock}.ts`, `/api/store.ts` (PostgresStore + MemoryStore), `/api/server.ts`, `/api/scripts/test-full-quiz.ts`. 30 Vitest tests (26 always run + 4 live-Postgres tests that run whenever `DATABASE_URL` is set, skipped otherwise). Verified against a real local Postgres instance, not just the in-memory fallback — see the test-it notes below.
 
 Node + Express, imports `/core`, never reimplements it. Twin chat goes through a swappable AI adapter with a hard quota guard in front of it — nothing calls out uncapped.
 
@@ -162,6 +163,9 @@ Give complete files + a test script that runs a full quiz over HTTP.
 ```
 
 **Test it:** the script runs start → finish → compile with no errors. Switch `LLM_PROVIDER` and confirm both paths respond. Then manually drop the daily-call cap to 1 in config, call `/twin/chat` twice, and confirm the second call is refused instead of hitting the provider.
+
+**Verification notes:** `npm run test:http` (from `/api`) does exactly this — over real HTTP, against a real spawned server, using `LLM_PROVIDER=mock` throughout (canned replies, same code path as the real providers, zero network calls or spend) so it never touches the Claude credit or needs a key. It ran a full 48-question quiz with zero repeats, compiled a clean twin prompt, got a chat reply, then re-ran with the daily cap set to 1 and confirmed call #2 comes back `429` with the friendly "twin's resting" message before ever reaching a provider. Also ran once with `DATABASE_URL` pointed at a real local Postgres instance to confirm the persistence path works for real, not just against the in-memory dev fallback — rows landed in `sessions`/`answers` as expected.
+A real bug turned up during this: replaying stored answers to rebuild a session had to call `currentBatch()` after every replayed answer (not just once at the end), or the batch-advancement logic would desync from what the live session had actually served. Fixed in `server.ts`'s `rebuildSession`.
 
 ---
 
