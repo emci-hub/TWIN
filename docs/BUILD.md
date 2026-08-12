@@ -100,6 +100,7 @@ Give complete files + how to run the tests.
 ---
 
 ## Phase 3 — Question delivery
+✅ Done. `/core/content/quiz-config.json`, `/core/question-delivery.ts` (Quick Start, sharpen batches, stop rule, `QuizSession`). **Deviation, flagged not silent:** Quick Start is 12 questions, not ~8 — Phase 1's content ended up one-dimension-per-question, so 8 questions could only ever cover 8 of 12 dimensions; 12 (one per dimension) is the smallest size that still covers all 12 as required. 31 Vitest tests, all green (includes consistent + random simulations).
 
 Quick Start + sharpen batches, not one long quiz. Uses Phase 1's content and Phase 2's confidence scores.
 

@@ -10,7 +10,7 @@ screens — it's the real product; everything else is a face on it.
 | 0 | Setup | ✅ done — folders, docs, hello-world web app |
 | 1 | Dimensions & content (Big Five via IPIP, risk/ambiguity/analytical via DOSPERT/MSTAT-II/Need-for-Cognition, style dims hand-written) | ✅ done |
 | 2 | Scoring engine ⭐ + Evidence Gate (see `docs/ARCHITECTURE.md`) | ✅ done |
-| 3 | Question delivery (Quick Start + sharpen batches) | pending |
+| 3 | Question delivery (Quick Start + sharpen batches) | ✅ done |
 | 4 | Twin compiler ⭐ | pending |
 | 5 | API (twin chat via swappable provider adapter: Anthropic / OpenRouter) | pending |
 | 6 | Web app (ports `docs/mockup.html` — quiz, results, "why", twin chat, Home) | pending |
