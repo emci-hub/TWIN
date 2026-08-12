@@ -191,6 +191,9 @@ Give complete files.
 ---
 
 ## Phase 7 — Deploy
+✅ Config + instructions done. `render.yaml` (repo root), `web/vercel.json`, `docs/DEPLOY.md` (full step-by-step: Supabase → Render → Vercel, including the current IPv4-pooler gotcha for Supabase-from-Render and exactly which env vars go where). **The actual live deploy is a "you" step** — creating the Supabase/Render/Vercel projects needs your own accounts, which this build session can't click through on your behalf; everything it *can* prepare (config files, verifying they typecheck/build, the error-logging fix below) is done and committed.
+
+**Deviation, flagged not silent:** while wiring up "basic error logging," found that most of `/api`'s async routes had no error handling around their DB calls — Express 4 doesn't catch a rejected promise from an async handler on its own, so a Postgres hiccup (realistic on a free-tier DB) would've hung the request forever with nothing in the logs, directly breaking this phase's own test criterion. Fixed with `api/async-handler.ts` + a global Express error-handling middleware (logs via `console.error`, returns a generic 500, never hangs or leaks a raw error to the client), plus `index.ts` process-level `unhandledRejection`/`uncaughtException` handlers as a last-resort net. Also moved `tsx` from `devDependencies` to `dependencies` in `/api` — Render (like most hosts) skips devDependencies on a production install, and `/api` has no compile step, so `tsx` itself needs to survive that.
 
 ```
 Help me deploy TwinArchitect:
@@ -200,6 +203,8 @@ Give step-by-step instructions and any config files.
 ```
 
 **Test it:** open the public URL on your phone, run a full quiz start to finish; errors show up in the logs.
+
+**Verification notes:** the error-logging fix is covered by a new test that spins up a real server against a store engineered to throw, and confirms the request gets a real 500 (not a hang) with the error actually logged — not just asserted (`api/server.test.ts`, "global error handling" block). `/api` is now 43 Vitest tests (was 42). `tsc --noEmit` clean for `/api`. The Supabase-pooler and Vercel-monorepo-root guidance in `docs/DEPLOY.md` was checked against each platform's current docs rather than assumed from training data, since both have changed their setup flow over time.
 
 ---
 

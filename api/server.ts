@@ -2,7 +2,7 @@
 // calls into it. See docs/CORE.md: "Scoring + twin logic live in /core
 // only, behind an API."
 
-import express, { type Express } from "express";
+import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { QuizSession, compileTwinPrompt, QUESTION_BANK, DIMENSIONS_CONTENT } from "../core/index.js";
@@ -10,6 +10,7 @@ import type { Store, StoredAnswer } from "./store.js";
 import { checkAndReserveQuota } from "./quota-guard.js";
 import { generateTwinReply, isKnownProvider } from "./llm/index.js";
 import { ACTIVE_PROVIDER, TWIN_CHAT_MAX_MESSAGE_LENGTH, INBOUND_RATE_LIMIT } from "./config.js";
+import { asyncHandler } from "./async-handler.js";
 
 /**
  * Resolves each stored (question_id, option_id) pair back to the question
@@ -83,185 +84,217 @@ export function createServer(store: Store): Express {
     res.json({ dimensions: DIMENSIONS_CONTENT });
   });
 
-  app.post("/session", async (_req, res) => {
-    const sessionRow = await store.createSession();
-    const quiz = new QuizSession();
-    const batch = quiz.currentBatch();
-    res.json({
-      session_id: sessionRow.id,
-      phase: quiz.phaseName,
-      batch,
-      profile: quiz.profile,
-      done: quiz.isDone,
-      round_size: quiz.roundSize,
-    });
-  });
+  app.post(
+    "/session",
+    asyncHandler(async (_req, res) => {
+      const sessionRow = await store.createSession();
+      const quiz = new QuizSession();
+      const batch = quiz.currentBatch();
+      res.json({
+        session_id: sessionRow.id,
+        phase: quiz.phaseName,
+        batch,
+        profile: quiz.profile,
+        done: quiz.isDone,
+        round_size: quiz.roundSize,
+      });
+    }),
+  );
 
   // Read-only — rebuilds and returns the current session state without
   // applying anything. Needed so the web app can show the real empty/filled
   // Home state, Results, the "Why" evidence trail, and resume an
   // in-progress quiz after a page refresh, all without answering a
   // question just to find out where things stand.
-  app.get("/session/:id", async (req, res) => {
-    const sessionId = req.params.id;
-    const sessionRow = await store.getSession(sessionId);
-    if (!sessionRow) {
-      res.status(404).json({ error: "unknown session_id" });
-      return;
-    }
+  app.get(
+    "/session/:id",
+    asyncHandler(async (req, res) => {
+      const sessionId = req.params.id;
+      const sessionRow = await store.getSession(sessionId);
+      if (!sessionRow) {
+        res.status(404).json({ error: "unknown session_id" });
+        return;
+      }
 
-    const quiz = await rebuildSession(store, sessionId);
-    const answers = await store.listAnswers(sessionId);
+      const quiz = await rebuildSession(store, sessionId);
+      const answers = await store.listAnswers(sessionId);
 
-    res.json({
-      session_id: sessionId,
-      profile: quiz.profile,
-      phase: quiz.phaseName,
-      batch: quiz.currentBatch(),
-      done: quiz.isDone,
-      stop_reason: quiz.stopReason,
-      round_size: quiz.roundSize,
-      frozen: sessionRow.frozen,
-      answers: resolveAnswerEvidence(answers),
-    });
-  });
+      res.json({
+        session_id: sessionId,
+        profile: quiz.profile,
+        phase: quiz.phaseName,
+        batch: quiz.currentBatch(),
+        done: quiz.isDone,
+        stop_reason: quiz.stopReason,
+        round_size: quiz.roundSize,
+        frozen: sessionRow.frozen,
+        answers: resolveAnswerEvidence(answers),
+      });
+    }),
+  );
 
   // Freezes a session — docs/CORE.md's "Profile freeze" rule. Stops ALL
   // further evidence (gate-approved or not) from moving the profile.
-  app.post("/session/:id/freeze", async (req, res) => {
-    const sessionId = req.params.id;
-    const sessionRow = await store.getSession(sessionId);
-    if (!sessionRow) {
-      res.status(404).json({ error: "unknown session_id" });
-      return;
-    }
-    await store.freezeSession(sessionId);
-    res.json({ session_id: sessionId, frozen: true });
-  });
+  app.post(
+    "/session/:id/freeze",
+    asyncHandler(async (req, res) => {
+      const sessionId = req.params.id;
+      const sessionRow = await store.getSession(sessionId);
+      if (!sessionRow) {
+        res.status(404).json({ error: "unknown session_id" });
+        return;
+      }
+      await store.freezeSession(sessionId);
+      res.json({ session_id: sessionId, frozen: true });
+    }),
+  );
 
-  app.post("/answer", async (req, res) => {
-    const { session_id, question_id, option_id } = req.body ?? {};
-    if (!session_id || !question_id || !option_id) {
-      res.status(400).json({ error: "session_id, question_id, and option_id are required" });
-      return;
-    }
+  app.post(
+    "/answer",
+    asyncHandler(async (req, res) => {
+      const { session_id, question_id, option_id } = req.body ?? {};
+      if (!session_id || !question_id || !option_id) {
+        res.status(400).json({ error: "session_id, question_id, and option_id are required" });
+        return;
+      }
 
-    const sessionRow = await store.getSession(session_id);
-    if (!sessionRow) {
-      res.status(404).json({ error: "unknown session_id" });
-      return;
-    }
-    if (sessionRow.frozen) {
-      res.status(409).json({ error: "this profile is frozen — no new evidence is being accepted" });
-      return;
-    }
+      const sessionRow = await store.getSession(session_id);
+      if (!sessionRow) {
+        res.status(404).json({ error: "unknown session_id" });
+        return;
+      }
+      if (sessionRow.frozen) {
+        res.status(409).json({ error: "this profile is frozen — no new evidence is being accepted" });
+        return;
+      }
 
-    const quiz = await rebuildSession(store, session_id);
+      const quiz = await rebuildSession(store, session_id);
 
-    if (quiz.isDone) {
-      res.status(409).json({
-        error: "this session already reached its stop rule — no more answers accepted",
-        stop_reason: quiz.stopReason,
+      if (quiz.isDone) {
+        res.status(409).json({
+          error: "this session already reached its stop rule — no more answers accepted",
+          stop_reason: quiz.stopReason,
+          profile: quiz.profile,
+        });
+        return;
+      }
+
+      const currentBatch = quiz.currentBatch();
+      if (!currentBatch.some((q) => q.id === question_id)) {
+        res.status(400).json({ error: `question ${question_id} is not in the current batch` });
+        return;
+      }
+
+      let gateResult;
+      try {
+        gateResult = quiz.answer(question_id, option_id);
+      } catch (err) {
+        res.status(400).json({ error: err instanceof Error ? err.message : "invalid answer" });
+        return;
+      }
+
+      await store.appendAnswer(session_id, { question_id, option_id, source: "quiz" });
+      await store.saveProfileSnapshot(session_id, quiz.profile);
+
+      const nextBatch = quiz.currentBatch();
+      res.json({
         profile: quiz.profile,
+        gate_result: gateResult,
+        next_question: nextBatch[0] ?? null,
+        batch: nextBatch,
+        phase: quiz.phaseName,
+        done: quiz.isDone,
+        stop_reason: quiz.stopReason,
+        round_size: quiz.roundSize,
       });
-      return;
-    }
+    }),
+  );
 
-    const currentBatch = quiz.currentBatch();
-    if (!currentBatch.some((q) => q.id === question_id)) {
-      res.status(400).json({ error: `question ${question_id} is not in the current batch` });
-      return;
-    }
+  app.post(
+    "/compile",
+    asyncHandler(async (req, res) => {
+      const { session_id } = req.body ?? {};
+      if (!session_id) {
+        res.status(400).json({ error: "session_id is required" });
+        return;
+      }
 
-    let gateResult;
-    try {
-      gateResult = quiz.answer(question_id, option_id);
-    } catch (err) {
-      res.status(400).json({ error: err instanceof Error ? err.message : "invalid answer" });
-      return;
-    }
+      const sessionRow = await store.getSession(session_id);
+      if (!sessionRow) {
+        res.status(404).json({ error: "unknown session_id" });
+        return;
+      }
 
-    await store.appendAnswer(session_id, { question_id, option_id, source: "quiz" });
-    await store.saveProfileSnapshot(session_id, quiz.profile);
+      const quiz = await rebuildSession(store, session_id);
+      const compiled = compileTwinPrompt(quiz.profile);
+      res.json(compiled);
+    }),
+  );
 
-    const nextBatch = quiz.currentBatch();
-    res.json({
-      profile: quiz.profile,
-      gate_result: gateResult,
-      next_question: nextBatch[0] ?? null,
-      batch: nextBatch,
-      phase: quiz.phaseName,
-      done: quiz.isDone,
-      stop_reason: quiz.stopReason,
-      round_size: quiz.roundSize,
-    });
-  });
+  app.post(
+    "/twin/chat",
+    twinChatLimiter,
+    asyncHandler(async (req, res) => {
+      const { session_id, message, provider } = req.body ?? {};
 
-  app.post("/compile", async (req, res) => {
-    const { session_id } = req.body ?? {};
-    if (!session_id) {
-      res.status(400).json({ error: "session_id is required" });
-      return;
-    }
+      if (!session_id || typeof message !== "string" || message.trim().length === 0) {
+        res.status(400).json({ error: "session_id and a non-empty message are required" });
+        return;
+      }
+      if (message.length > TWIN_CHAT_MAX_MESSAGE_LENGTH) {
+        res.status(400).json({
+          error: `message too long — max ${TWIN_CHAT_MAX_MESSAGE_LENGTH} characters`,
+        });
+        return;
+      }
+      // Optional per-call provider choice (Phase 6 Settings screen). Falls
+      // back to the server's configured default when omitted/unrecognized —
+      // never silently ignored, but also never trusted blindly.
+      if (provider !== undefined && !isKnownProvider(provider)) {
+        res.status(400).json({ error: `unknown provider "${provider}"` });
+        return;
+      }
 
-    const sessionRow = await store.getSession(session_id);
-    if (!sessionRow) {
-      res.status(404).json({ error: "unknown session_id" });
-      return;
-    }
+      const sessionRow = await store.getSession(session_id);
+      if (!sessionRow) {
+        res.status(404).json({ error: "unknown session_id" });
+        return;
+      }
 
-    const quiz = await rebuildSession(store, session_id);
-    const compiled = compileTwinPrompt(quiz.profile);
-    res.json(compiled);
-  });
+      // Outbound quota guard — runs BEFORE the provider is ever called. Keyed
+      // on whichever provider will actually be used, so a client-chosen
+      // provider is still fully subject to its own limits/hard cap.
+      const quota = checkAndReserveQuota(provider);
+      if (!quota.allowed) {
+        res.status(429).json({ error: "twin's resting, try again shortly", reason: quota.reason });
+        return;
+      }
 
-  app.post("/twin/chat", twinChatLimiter, async (req, res) => {
-    const { session_id, message, provider } = req.body ?? {};
+      const quiz = await rebuildSession(store, session_id);
 
-    if (!session_id || typeof message !== "string" || message.trim().length === 0) {
-      res.status(400).json({ error: "session_id and a non-empty message are required" });
-      return;
-    }
-    if (message.length > TWIN_CHAT_MAX_MESSAGE_LENGTH) {
-      res.status(400).json({
-        error: `message too long — max ${TWIN_CHAT_MAX_MESSAGE_LENGTH} characters`,
-      });
-      return;
-    }
-    // Optional per-call provider choice (Phase 6 Settings screen). Falls
-    // back to the server's configured default when omitted/unrecognized —
-    // never silently ignored, but also never trusted blindly.
-    if (provider !== undefined && !isKnownProvider(provider)) {
-      res.status(400).json({ error: `unknown provider "${provider}"` });
-      return;
-    }
+      try {
+        const result = await generateTwinReply(quiz.profile, message, provider);
+        res.json(result);
+      } catch (err) {
+        res.status(502).json({
+          error: "the twin's AI provider failed to respond — try again shortly",
+          detail: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }),
+  );
 
-    const sessionRow = await store.getSession(session_id);
-    if (!sessionRow) {
-      res.status(404).json({ error: "unknown session_id" });
-      return;
-    }
-
-    // Outbound quota guard — runs BEFORE the provider is ever called. Keyed
-    // on whichever provider will actually be used, so a client-chosen
-    // provider is still fully subject to its own limits/hard cap.
-    const quota = checkAndReserveQuota(provider);
-    if (!quota.allowed) {
-      res.status(429).json({ error: "twin's resting, try again shortly", reason: quota.reason });
-      return;
-    }
-
-    const quiz = await rebuildSession(store, session_id);
-
-    try {
-      const result = await generateTwinReply(quiz.profile, message, provider);
-      res.json(result);
-    } catch (err) {
-      res.status(502).json({
-        error: "the twin's AI provider failed to respond — try again shortly",
-        detail: err instanceof Error ? err.message : String(err),
-      });
-    }
+  // Global error handler — the tail end of the asyncHandler-wrapped routes
+  // above funnels any thrown/rejected error here via next(err), instead of
+  // it silently hanging the request or vanishing. Logged with console.error
+  // so it shows up in the host's log tail (Render, in production — see
+  // docs/DEPLOY.md), and the client gets a generic message, never a raw
+  // stack trace or DB error string.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    console.error("[unhandled route error]", err);
+    if (res.headersSent) return;
+    res.status(500).json({ error: "something went wrong on our end — try again shortly" });
   });
 
   return app;

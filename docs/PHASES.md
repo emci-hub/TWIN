@@ -14,7 +14,7 @@ screens — it's the real product; everything else is a face on it.
 | 4 | Twin compiler ⭐ | ✅ done |
 | 5 | API (twin chat via swappable provider adapter: Anthropic / OpenRouter) | ✅ done |
 | 6 | Web app (ports `docs/mockup.html` — quiz, results, "why", twin chat, Home) | ✅ done |
-| 7 | Deploy | pending |
+| 7 | Deploy | ✅ config + instructions done — see `docs/DEPLOY.md`; live deploy needs your own Supabase/Render/Vercel accounts |
 
 Copy-paste prompts + a test for each: `docs/BUILD.md`.
 

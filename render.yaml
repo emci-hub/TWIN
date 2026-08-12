@@ -1,0 +1,49 @@
+# Render Blueprint for the TwinArchitect API (/api). Deploy via Render's
+# dashboard -> New -> Blueprint, pointing at this repo -> Render reads this
+# file and creates the service below automatically.
+#
+# The build/start commands `cd api` first because /api imports /core via a
+# relative path (`../core/index.js`) and has no compile step of its own — it
+# runs the real TypeScript source directly with tsx (see /api/package.json).
+# That means the whole repo (not just /api) must be checked out, so this
+# does NOT set rootDir to api/ the way a fully-independent service would.
+#
+# Secrets (marked sync: false below) are never stored in this file or in
+# git — Render prompts for them once in the dashboard the first time this
+# Blueprint is applied. See docs/DEPLOY.md for the full walkthrough.
+
+services:
+  - type: web
+    name: twinarchitect-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: master
+    buildCommand: cd api && npm install
+    startCommand: cd api && npm start
+    healthCheckPath: /health
+    envVars:
+      # Node's own runtime version — pin it so tsx/pg behave the same in
+      # production as they did while building. Bump this if you bump it
+      # locally.
+      - key: NODE_VERSION
+        value: 20.18.0
+
+      # Render sets PORT itself at deploy time; /api/config.ts already
+      # reads process.env.PORT (defaulting to 3001 only when unset, e.g.
+      # local dev) — nothing to configure here.
+
+      # --- Secrets / per-environment values — set these once in the Render
+      # dashboard the first time this Blueprint is applied (sync: false
+      # means "prompt me, don't store a value in this file"). See
+      # docs/DEPLOY.md for where each one comes from. ---
+      - key: DATABASE_URL
+        sync: false
+      - key: LLM_PROVIDER
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ANTHROPIC_HARD_DAILY_CAP
+        sync: false

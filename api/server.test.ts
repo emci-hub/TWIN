@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { Express } from "express";
 import { createServer } from "./server.js";
-import { MemoryStore } from "./store.js";
+import { MemoryStore, type Store } from "./store.js";
 import { resetQuotaStateForTests } from "./quota-guard.js";
 import { DEFAULT_QUIZ_CONFIG } from "../core/index.js";
 
@@ -394,6 +394,36 @@ describe("POST /twin/chat", () => {
       }
       expect(results.filter((s) => s === 429).length).toBeGreaterThan(0);
     } finally {
+      server.close();
+    }
+  });
+});
+
+describe("global error handling (Phase 7 — errors must be logged, never hang)", () => {
+  // Express 4 doesn't catch a rejected promise thrown out of an async route
+  // handler on its own — without the asyncHandler wrapper + global error
+  // middleware in server.ts, a store failure here would hang the request
+  // forever instead of returning a response. This proves the wiring
+  // actually works, not just that it typechecks.
+  it("a thrown store error is caught, logged, and answered with 500 instead of hanging", async () => {
+    class BrokenStore extends MemoryStore implements Store {
+      async createSession(): ReturnType<Store["createSession"]> {
+        throw new Error("simulated database outage");
+      }
+    }
+    const brokenApp = createServer(new BrokenStore());
+    const { server, baseUrl } = await startEphemeral(brokenApp);
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await fetch(`${baseUrl}/session`, { method: "POST" });
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBeTruthy();
+      // the real error/stack must never leak to the client
+      expect(JSON.stringify(body)).not.toContain("simulated database outage");
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
       server.close();
     }
   });
