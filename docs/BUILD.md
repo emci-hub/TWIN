@@ -59,6 +59,7 @@ See Phase 5b below.
 ---
 
 ## Phase 1 — Dimensions & content
+✅ Done. `/core/content/dimensions.json` (12), `/core/content/questions.json` (56: 48 preference + 8 situational), `/core/content/coverage.ts` — coverage script confirms all criteria below pass.
 
 Sources the trait content instead of writing it cold. Only 4 of 12 dimensions get new questions. A handful of scenario-based items are mixed in for the "judgement" side of things, not just preference items.
 

@@ -8,7 +8,7 @@ screens — it's the real product; everything else is a face on it.
 | # | Phase | Status |
 |---|---|---|
 | 0 | Setup | ✅ done — folders, docs, hello-world web app |
-| 1 | Dimensions & content (Big Five via IPIP, risk/ambiguity/analytical via DOSPERT/MSTAT-II/Need-for-Cognition, style dims hand-written) | pending |
+| 1 | Dimensions & content (Big Five via IPIP, risk/ambiguity/analytical via DOSPERT/MSTAT-II/Need-for-Cognition, style dims hand-written) | ✅ done |
 | 2 | Scoring engine ⭐ + Evidence Gate (see `docs/ARCHITECTURE.md`) | pending |
 | 3 | Question delivery (Quick Start + sharpen batches) | pending |
 | 4 | Twin compiler ⭐ | pending |
