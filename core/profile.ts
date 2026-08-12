@@ -32,7 +32,8 @@ interface InternalDimensionState {
   directionsSeen: Set<Direction>;
 }
 
-const DIMENSION_IDS = (dimensions as { id: string }[]).map((d) => d.id);
+/** The 12 fixed dimension ids, in docs/CORE.md/dimensions.json order. */
+export const DIMENSION_IDS = (dimensions as { id: string }[]).map((d) => d.id);
 
 /**
  * Builds a profile from a stream of answers. Raw answers are still the

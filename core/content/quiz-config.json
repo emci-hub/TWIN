@@ -1,0 +1,7 @@
+{
+  "quick_start_size": 12,
+  "sharpen_batch_size": 6,
+  "target_confidence": 0.35,
+  "max_questions": 50,
+  "contradiction_penalty": 0.5
+}
