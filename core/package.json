@@ -1,0 +1,14 @@
+{
+  "name": "@twinarchitect/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TwinArchitect scoring engine, evidence gate, twin compiler, and content — imported by /api, never reimplemented elsewhere.",
+  "type": "module",
+  "scripts": {
+    "coverage": "tsx content/coverage.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "tsx": "^4.16.2"
+  }
+}

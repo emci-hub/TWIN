@@ -1,0 +1,293 @@
+[
+  { "id": "q01", "type": "preference", "source": "IPIP", "prompt": "When trying something new, I usually...",
+    "options": [
+      { "id": "a", "text": "Get curious and want to explore it further", "targets": [{ "dim": "openness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Stick with what I already know works", "targets": [{ "dim": "openness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q02", "type": "preference", "source": "IPIP", "prompt": "My ideal weekend involves...",
+    "options": [
+      { "id": "a", "text": "Discovering something I've never done before", "targets": [{ "dim": "openness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Repeating a routine I already enjoy", "targets": [{ "dim": "openness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q03", "type": "preference", "source": "IPIP", "prompt": "I'm the kind of person who...",
+    "options": [
+      { "id": "a", "text": "Loves abstract ideas and theories", "targets": [{ "dim": "openness", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Prefers concrete, practical facts", "targets": [{ "dim": "openness", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q04", "type": "preference", "source": "IPIP", "prompt": "When it comes to art or music...",
+    "options": [
+      { "id": "a", "text": "I actively seek out unusual or experimental styles", "targets": [{ "dim": "openness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I stick to genres and styles I already like", "targets": [{ "dim": "openness", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q05", "type": "preference", "source": "IPIP", "prompt": "Before starting a project I...",
+    "options": [
+      { "id": "a", "text": "Make a detailed plan first", "targets": [{ "dim": "conscientiousness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Just dive in and figure it out as I go", "targets": [{ "dim": "conscientiousness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q06", "type": "preference", "source": "IPIP", "prompt": "My workspace tends to be...",
+    "options": [
+      { "id": "a", "text": "Organized — everything has its place", "targets": [{ "dim": "conscientiousness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "A bit messy, but I know where things are", "targets": [{ "dim": "conscientiousness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q07", "type": "preference", "source": "IPIP", "prompt": "Deadlines make me...",
+    "options": [
+      { "id": "a", "text": "Finish well ahead of time", "targets": [{ "dim": "conscientiousness", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Finish right at the wire", "targets": [{ "dim": "conscientiousness", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q08", "type": "preference", "source": "IPIP", "prompt": "When I commit to something...",
+    "options": [
+      { "id": "a", "text": "I follow through no matter what", "targets": [{ "dim": "conscientiousness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I keep my options open in case something better comes up", "targets": [{ "dim": "conscientiousness", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q09", "type": "preference", "source": "IPIP", "prompt": "After a long week, I recharge by...",
+    "options": [
+      { "id": "a", "text": "Going out and being around people", "targets": [{ "dim": "extraversion", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Having quiet time alone", "targets": [{ "dim": "extraversion", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q10", "type": "preference", "source": "IPIP", "prompt": "At a party...",
+    "options": [
+      { "id": "a", "text": "I'm usually talking to everyone", "targets": [{ "dim": "extraversion", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "I stick with one or two people I know", "targets": [{ "dim": "extraversion", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q11", "type": "preference", "source": "IPIP", "prompt": "I'd describe myself as...",
+    "options": [
+      { "id": "a", "text": "The one who starts conversations", "targets": [{ "dim": "extraversion", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "The one who waits to be spoken to", "targets": [{ "dim": "extraversion", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q12", "type": "preference", "source": "IPIP", "prompt": "Big group settings...",
+    "options": [
+      { "id": "a", "text": "Energize me", "targets": [{ "dim": "extraversion", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Drain me", "targets": [{ "dim": "extraversion", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q13", "type": "preference", "source": "IPIP", "prompt": "When a friend asks for feedback...",
+    "options": [
+      { "id": "a", "text": "I focus on being kind, even if it softens the truth", "targets": [{ "dim": "agreeableness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I tell them exactly what I think", "targets": [{ "dim": "agreeableness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q14", "type": "preference", "source": "IPIP", "prompt": "In a disagreement, I usually...",
+    "options": [
+      { "id": "a", "text": "Look for the compromise that keeps everyone happy", "targets": [{ "dim": "agreeableness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Stand my ground on what I believe is right", "targets": [{ "dim": "agreeableness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q15", "type": "preference", "source": "IPIP", "prompt": "I tend to...",
+    "options": [
+      { "id": "a", "text": "Trust people's good intentions by default", "targets": [{ "dim": "agreeableness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Wait for people to prove themselves", "targets": [{ "dim": "agreeableness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q16", "type": "preference", "source": "IPIP", "prompt": "If someone's plan is flawed...",
+    "options": [
+      { "id": "a", "text": "I go along with it to avoid conflict", "targets": [{ "dim": "agreeableness", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "I point out the flaws directly", "targets": [{ "dim": "agreeableness", "direction": "-", "strength": "strong" }] }
+    ] },
+
+  { "id": "q17", "type": "preference", "source": "IPIP", "prompt": "When something goes wrong unexpectedly...",
+    "options": [
+      { "id": "a", "text": "It stresses me out for a while", "targets": [{ "dim": "neuroticism", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I shrug it off pretty quickly", "targets": [{ "dim": "neuroticism", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q18", "type": "preference", "source": "IPIP", "prompt": "Before a big event...",
+    "options": [
+      { "id": "a", "text": "I feel noticeably anxious", "targets": [{ "dim": "neuroticism", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I feel mostly calm", "targets": [{ "dim": "neuroticism", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q19", "type": "preference", "source": "IPIP", "prompt": "My mood...",
+    "options": [
+      { "id": "a", "text": "Shifts a fair amount day to day", "targets": [{ "dim": "neuroticism", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Stays pretty even", "targets": [{ "dim": "neuroticism", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q20", "type": "preference", "source": "IPIP", "prompt": "Criticism...",
+    "options": [
+      { "id": "a", "text": "Sticks with me for a while", "targets": [{ "dim": "neuroticism", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Rolls off me quickly", "targets": [{ "dim": "neuroticism", "direction": "-", "strength": "strong" }] }
+    ] },
+
+  { "id": "q21", "type": "preference", "source": "DOSPERT", "prompt": "Investing money, I'd rather...",
+    "options": [
+      { "id": "a", "text": "Put it somewhere with real upside, even if it could lose value", "targets": [{ "dim": "risk_tolerance", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Keep it somewhere safe and predictable", "targets": [{ "dim": "risk_tolerance", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q22", "type": "preference", "source": "DOSPERT", "prompt": "On a trip, I'm more likely to...",
+    "options": [
+      { "id": "a", "text": "Try the extreme activity everyone's nervous about", "targets": [{ "dim": "risk_tolerance", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Watch from the sidelines", "targets": [{ "dim": "risk_tolerance", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q23", "type": "preference", "source": "DOSPERT", "prompt": "Given a new opportunity with unknown odds...",
+    "options": [
+      { "id": "a", "text": "I lean toward taking it", "targets": [{ "dim": "risk_tolerance", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I lean toward passing", "targets": [{ "dim": "risk_tolerance", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q24", "type": "preference", "source": "DOSPERT", "prompt": "Speaking up with an unpopular opinion in a group...",
+    "options": [
+      { "id": "a", "text": "Doesn't really worry me", "targets": [{ "dim": "risk_tolerance", "direction": "+", "strength": "weak" }] },
+      { "id": "b", "text": "Makes me hesitate", "targets": [{ "dim": "risk_tolerance", "direction": "-", "strength": "weak" }] }
+    ] },
+  { "id": "qs01", "type": "situational", "source": "situational", "prompt": "You're offered a new role: higher pay, but the company is early-stage and could fold within a year.",
+    "options": [
+      { "id": "a", "text": "Take it — the upside is worth the gamble", "targets": [{ "dim": "risk_tolerance", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Pass — I'd rather have stability", "targets": [{ "dim": "risk_tolerance", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "qs02", "type": "situational", "source": "situational", "prompt": "A friend suggests splitting the last spot on a risky backcountry hike with no guide.",
+    "options": [
+      { "id": "a", "text": "I'm in", "targets": [{ "dim": "risk_tolerance", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I'd rather go with a guided group", "targets": [{ "dim": "risk_tolerance", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q25", "type": "preference", "source": "Need for Cognition", "prompt": "Given a complicated problem, I...",
+    "options": [
+      { "id": "a", "text": "Enjoy digging into the details", "targets": [{ "dim": "analytical_detail", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Want the simplified version", "targets": [{ "dim": "analytical_detail", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q26", "type": "preference", "source": "Need for Cognition", "prompt": "When reading instructions...",
+    "options": [
+      { "id": "a", "text": "I read every detail before starting", "targets": [{ "dim": "analytical_detail", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I skim and figure it out as I go", "targets": [{ "dim": "analytical_detail", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q27", "type": "preference", "source": "Need for Cognition", "prompt": "I'd rather a task be...",
+    "options": [
+      { "id": "a", "text": "Complex and challenging", "targets": [{ "dim": "analytical_detail", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Simple and quick", "targets": [{ "dim": "analytical_detail", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q28", "type": "preference", "source": "Need for Cognition", "prompt": "When making a decision...",
+    "options": [
+      { "id": "a", "text": "I research thoroughly first", "targets": [{ "dim": "analytical_detail", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I go with my gut", "targets": [{ "dim": "analytical_detail", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "qs03", "type": "situational", "source": "situational", "prompt": "You're buying a big appliance and there are 15 models with different specs.",
+    "options": [
+      { "id": "a", "text": "I compare every spec before deciding", "targets": [{ "dim": "analytical_detail", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "I pick a reputable brand and move on", "targets": [{ "dim": "analytical_detail", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "qs04", "type": "situational", "source": "situational", "prompt": "A report you're reviewing has a small inconsistency buried in a footnote.",
+    "options": [
+      { "id": "a", "text": "I'd catch it and flag it", "targets": [{ "dim": "analytical_detail", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I'd likely skim past it", "targets": [{ "dim": "analytical_detail", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q29", "type": "preference", "source": "MSTAT-II", "prompt": "A project with no clear deadline or spec feels...",
+    "options": [
+      { "id": "a", "text": "Kind of freeing", "targets": [{ "dim": "ambiguity_tolerance", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Stressful — I'd rather have the edges defined", "targets": [{ "dim": "ambiguity_tolerance", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q30", "type": "preference", "source": "MSTAT-II", "prompt": "I prefer situations that are...",
+    "options": [
+      { "id": "a", "text": "Open-ended", "targets": [{ "dim": "ambiguity_tolerance", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Clearly defined", "targets": [{ "dim": "ambiguity_tolerance", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q31", "type": "preference", "source": "MSTAT-II", "prompt": "Not knowing how something will turn out...",
+    "options": [
+      { "id": "a", "text": "Doesn't bother me much", "targets": [{ "dim": "ambiguity_tolerance", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Makes me uneasy", "targets": [{ "dim": "ambiguity_tolerance", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q32", "type": "preference", "source": "MSTAT-II", "prompt": "Rules and structure...",
+    "options": [
+      { "id": "a", "text": "Feel limiting to me", "targets": [{ "dim": "ambiguity_tolerance", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Feel reassuring to me", "targets": [{ "dim": "ambiguity_tolerance", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "qs05", "type": "situational", "source": "situational", "prompt": "Your manager gives you a vague brief — 'make it better' — with no other direction.",
+    "options": [
+      { "id": "a", "text": "I'll figure out the direction myself", "targets": [{ "dim": "ambiguity_tolerance", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "I'll ask for specifics before starting", "targets": [{ "dim": "ambiguity_tolerance", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "qs06", "type": "situational", "source": "situational", "prompt": "Plans for the weekend keep changing at the last minute.",
+    "options": [
+      { "id": "a", "text": "That's fine, I'll adapt", "targets": [{ "dim": "ambiguity_tolerance", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I'd rather lock something in early", "targets": [{ "dim": "ambiguity_tolerance", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q33", "type": "preference", "source": "custom", "prompt": "Explaining something, I tend to...",
+    "options": [
+      { "id": "a", "text": "Give the full context and details", "targets": [{ "dim": "verbosity", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Give the short version", "targets": [{ "dim": "verbosity", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q34", "type": "preference", "source": "custom", "prompt": "My texts are usually...",
+    "options": [
+      { "id": "a", "text": "A few sentences or more", "targets": [{ "dim": "verbosity", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Short and to the point", "targets": [{ "dim": "verbosity", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q35", "type": "preference", "source": "custom", "prompt": "When telling a story...",
+    "options": [
+      { "id": "a", "text": "I include all the details that made it good", "targets": [{ "dim": "verbosity", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "I get straight to the punchline", "targets": [{ "dim": "verbosity", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q36", "type": "preference", "source": "custom", "prompt": "Asked a simple question, I...",
+    "options": [
+      { "id": "a", "text": "Give a thorough answer", "targets": [{ "dim": "verbosity", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Give a one-line answer", "targets": [{ "dim": "verbosity", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q37", "type": "preference", "source": "custom", "prompt": "Giving feedback, I...",
+    "options": [
+      { "id": "a", "text": "Say exactly what I think", "targets": [{ "dim": "directness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Ease into it gently", "targets": [{ "dim": "directness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q38", "type": "preference", "source": "custom", "prompt": "If I disagree with someone...",
+    "options": [
+      { "id": "a", "text": "I say so plainly", "targets": [{ "dim": "directness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "I hint at it or wait for a better moment", "targets": [{ "dim": "directness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q39", "type": "preference", "source": "custom", "prompt": "My communication style is...",
+    "options": [
+      { "id": "a", "text": "Blunt", "targets": [{ "dim": "directness", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Diplomatic", "targets": [{ "dim": "directness", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q40", "type": "preference", "source": "custom", "prompt": "Asked my honest opinion, I...",
+    "options": [
+      { "id": "a", "text": "Give it straight, even if it's not what they want to hear", "targets": [{ "dim": "directness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Soften it so it lands better", "targets": [{ "dim": "directness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "qs07", "type": "situational", "source": "situational", "prompt": "A close friend shows you a project they're proud of, but it has a real problem.",
+    "options": [
+      { "id": "a", "text": "Tell them the problem directly, right away", "targets": [{ "dim": "directness", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Praise the good parts first, then ease into the issue", "targets": [{ "dim": "directness", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "qs08", "type": "situational", "source": "situational", "prompt": "A coworker asks if their idea in the meeting was good — it wasn't.",
+    "options": [
+      { "id": "a", "text": "Say plainly it needs work", "targets": [{ "dim": "directness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Find something positive to lead with", "targets": [{ "dim": "directness", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q41", "type": "preference", "source": "custom", "prompt": "My default writing style is...",
+    "options": [
+      { "id": "a", "text": "Polished and proper", "targets": [{ "dim": "formality", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Casual and relaxed", "targets": [{ "dim": "formality", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q42", "type": "preference", "source": "custom", "prompt": "Meeting someone new professionally, I...",
+    "options": [
+      { "id": "a", "text": "Keep things fairly formal", "targets": [{ "dim": "formality", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Keep things pretty casual", "targets": [{ "dim": "formality", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q43", "type": "preference", "source": "custom", "prompt": "I'm more comfortable...",
+    "options": [
+      { "id": "a", "text": "In structured, formal settings", "targets": [{ "dim": "formality", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "In relaxed, informal settings", "targets": [{ "dim": "formality", "direction": "-", "strength": "strong" }] }
+    ] },
+  { "id": "q44", "type": "preference", "source": "custom", "prompt": "My messages tend to...",
+    "options": [
+      { "id": "a", "text": "Use proper grammar and structure", "targets": [{ "dim": "formality", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Use shorthand, slang, casual phrasing", "targets": [{ "dim": "formality", "direction": "-", "strength": "moderate" }] }
+    ] },
+
+  { "id": "q45", "type": "preference", "source": "custom", "prompt": "My sense of humor is more...",
+    "options": [
+      { "id": "a", "text": "Deadpan and understated", "targets": [{ "dim": "humor_dryness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Expressive and animated", "targets": [{ "dim": "humor_dryness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q46", "type": "preference", "source": "custom", "prompt": "When I make a joke, I...",
+    "options": [
+      { "id": "a", "text": "Deliver it completely straight-faced", "targets": [{ "dim": "humor_dryness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Deliver it with energy and reactions", "targets": [{ "dim": "humor_dryness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q47", "type": "preference", "source": "custom", "prompt": "I find humor that's...",
+    "options": [
+      { "id": "a", "text": "Dry and subtle", "targets": [{ "dim": "humor_dryness", "direction": "+", "strength": "moderate" }] },
+      { "id": "b", "text": "Big and obvious", "targets": [{ "dim": "humor_dryness", "direction": "-", "strength": "moderate" }] }
+    ] },
+  { "id": "q48", "type": "preference", "source": "custom", "prompt": "Friends would describe my humor as...",
+    "options": [
+      { "id": "a", "text": "Dry — you have to catch it", "targets": [{ "dim": "humor_dryness", "direction": "+", "strength": "strong" }] },
+      { "id": "b", "text": "Warm and easy to read", "targets": [{ "dim": "humor_dryness", "direction": "-", "strength": "strong" }] }
+    ] }
+]

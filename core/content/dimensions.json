@@ -1,0 +1,74 @@
+[
+  {
+    "id": "openness",
+    "label": "Openness",
+    "low": "Prefers the familiar and tried-and-true",
+    "high": "Drawn to new ideas, art, and experiences"
+  },
+  {
+    "id": "conscientiousness",
+    "label": "Conscientiousness",
+    "low": "Spontaneous, goes with the flow",
+    "high": "Organized, plans ahead, follows through"
+  },
+  {
+    "id": "extraversion",
+    "label": "Extraversion",
+    "low": "Reserved, recharges alone",
+    "high": "Outgoing, energized by people"
+  },
+  {
+    "id": "agreeableness",
+    "label": "Agreeableness",
+    "low": "Direct, prioritizes honesty over harmony",
+    "high": "Warm, accommodating, avoids friction"
+  },
+  {
+    "id": "neuroticism",
+    "label": "Neuroticism",
+    "low": "Steady, calm under pressure",
+    "high": "Reactive, feels stress more intensely"
+  },
+  {
+    "id": "risk_tolerance",
+    "label": "Risk tolerance",
+    "low": "Cautious, avoids uncertain bets",
+    "high": "Comfortable with risk, bold with unknowns"
+  },
+  {
+    "id": "analytical_detail",
+    "label": "Analytical detail",
+    "low": "Big-picture, goes on instinct",
+    "high": "Detail-first, likes to dig into specifics"
+  },
+  {
+    "id": "ambiguity_tolerance",
+    "label": "Ambiguity tolerance",
+    "low": "Wants clear structure and defined answers",
+    "high": "Comfortable when things are undefined"
+  },
+  {
+    "id": "verbosity",
+    "label": "Verbosity",
+    "low": "Brief, gets to the point",
+    "high": "Elaborate, likes to explain fully"
+  },
+  {
+    "id": "directness",
+    "label": "Directness",
+    "low": "Diplomatic, softens delivery",
+    "high": "Blunt, says it plainly"
+  },
+  {
+    "id": "formality",
+    "label": "Formality",
+    "low": "Casual, informal tone",
+    "high": "Formal, polished tone"
+  },
+  {
+    "id": "humor_dryness",
+    "label": "Humor dryness",
+    "low": "Warm, expressive humor",
+    "high": "Deadpan, dry humor"
+  }
+]
