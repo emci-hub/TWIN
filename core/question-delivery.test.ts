@@ -150,3 +150,36 @@ describe("QuizSession — answer() guards", () => {
     expect(() => session.answer(batch[0].id, "not_a_real_option")).toThrow();
   });
 });
+
+describe("QuizSession — roundSize", () => {
+  // Phase 6 (/web) draws its quiz progress bar from this value instead of
+  // the live queue length, specifically because the queue only ever shows
+  // what's LEFT to answer — after a page refresh rebuilds the session from
+  // stored answers, a mid-round queue length is not the round's true
+  // starting size. roundSize is a structural constant from
+  // quiz-config.json, so it stays correct no matter when it's read.
+  it("reports quick_start_size during Quick Start, even mid-round", () => {
+    const session = new QuizSession();
+    expect(session.roundSize).toBe(DEFAULT_QUIZ_CONFIG.quick_start_size);
+
+    const batch = session.currentBatch();
+    session.answer(batch[0].id, batch[0].options[0].id);
+    // still mid Quick Start — the queue has shrunk by one, but roundSize
+    // must not move, since that's exactly what a post-refresh rebuild
+    // needs to still be correct.
+    expect(session.roundSize).toBe(DEFAULT_QUIZ_CONFIG.quick_start_size);
+  });
+
+  it("reports sharpen_batch_size once the session moves into sharpen", () => {
+    const session = new QuizSession();
+    let batch = session.currentBatch();
+    while (session.phaseName === "quick_start") {
+      const q = batch[0];
+      session.answer(q.id, consistentPick(q));
+      batch = session.currentBatch();
+    }
+    if (session.phaseName === "sharpen") {
+      expect(session.roundSize).toBe(DEFAULT_QUIZ_CONFIG.sharpen_batch_size);
+    }
+  });
+});

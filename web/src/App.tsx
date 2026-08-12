@@ -1,12 +1,39 @@
+import { useHashRoute } from "./lib/useHashRoute";
+import { useTheme } from "./lib/useTheme";
+import { useSession } from "./lib/SessionContext";
+import { Sidebar } from "./components/Sidebar";
+import { Topbar } from "./components/Topbar";
+import { Home } from "./screens/Home";
+import { Quiz } from "./screens/Quiz";
+import { Results } from "./screens/Results";
+import { Why } from "./screens/Why";
+import { Chat } from "./screens/Chat";
+import { Settings } from "./screens/Settings";
+
 function App() {
+  const [screen, navigate] = useHashRoute();
+  const [theme, toggleTheme] = useTheme();
+  const { error } = useSession();
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-semibold text-gray-900">hello world</h1>
-        <p className="text-gray-500">TwinArchitect — Phase 0 scaffold (web)</p>
+    <div className="app-root">
+      <Sidebar active={screen} onNavigate={navigate} />
+      <div className="main">
+        <Topbar screen={screen} theme={theme} onToggleTheme={toggleTheme} />
+        <div className="content">
+          {error && screen !== "quiz" && screen !== "settings" && (
+            <div className="banner banner-error">{error}</div>
+          )}
+          {screen === "home" && <Home onNavigate={navigate} />}
+          {screen === "quiz" && <Quiz onNavigate={navigate} />}
+          {screen === "results" && <Results />}
+          {screen === "why" && <Why />}
+          {screen === "chat" && <Chat />}
+          {screen === "settings" && <Settings />}
+        </div>
       </div>
-    </main>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;

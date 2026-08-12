@@ -3,6 +3,7 @@ import type { Express } from "express";
 import { createServer } from "./server.js";
 import { MemoryStore } from "./store.js";
 import { resetQuotaStateForTests } from "./quota-guard.js";
+import { DEFAULT_QUIZ_CONFIG } from "../core/index.js";
 
 // LLM_PROVIDER isn't set in the test environment, so config.ts's default
 // ("mock") is what's active — no real provider is ever called by these tests.
@@ -24,6 +25,24 @@ async function startEphemeral(app: Express) {
   return { server, baseUrl: `http://127.0.0.1:${address.port}` };
 }
 
+describe("GET /dimensions", () => {
+  it("returns all 12 dimensions with label/low/high text", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/dimensions`);
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.dimensions.length).toBe(12);
+      expect(body.dimensions[0]).toHaveProperty("id");
+      expect(body.dimensions[0]).toHaveProperty("label");
+      expect(body.dimensions[0]).toHaveProperty("low");
+      expect(body.dimensions[0]).toHaveProperty("high");
+    } finally {
+      server.close();
+    }
+  });
+});
+
 describe("POST /session", () => {
   it("returns a session id and a Quick Start batch covering fresh, low-confidence dimensions", async () => {
     const { server, baseUrl } = await startEphemeral(app);
@@ -35,6 +54,7 @@ describe("POST /session", () => {
       expect(body.phase).toBe("quick_start");
       expect(body.batch.length).toBeGreaterThan(0);
       expect(body.done).toBe(false);
+      expect(body.round_size).toBe(DEFAULT_QUIZ_CONFIG.quick_start_size);
     } finally {
       server.close();
     }
@@ -57,6 +77,7 @@ describe("POST /answer", () => {
       expect(answerRes.status).toBe(200);
       const body = await answerRes.json();
       expect(body.profile[q.options[0].targets[0].dim].confidence).toBeGreaterThan(0);
+      expect(body.round_size).toBe(DEFAULT_QUIZ_CONFIG.quick_start_size);
     } finally {
       server.close();
     }
@@ -103,6 +124,130 @@ describe("POST /answer", () => {
   });
 });
 
+describe("GET /session/:id", () => {
+  it("returns the empty-state profile and an empty answer trail for a brand-new session", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const sessionRes = await fetch(`${baseUrl}/session`, { method: "POST" });
+      const { session_id } = await sessionRes.json();
+
+      const getRes = await fetch(`${baseUrl}/session/${session_id}`);
+      expect(getRes.status).toBe(200);
+      const body = await getRes.json();
+      expect(body.answers).toEqual([]);
+      expect(body.done).toBe(false);
+      expect(body.frozen).toBe(false);
+      expect(body.phase).toBe("quick_start");
+    } finally {
+      server.close();
+    }
+  });
+
+  it("resolves stored answers back to their prompt, chosen text, and evidence targets", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const sessionRes = await fetch(`${baseUrl}/session`, { method: "POST" });
+      const { session_id, batch } = await sessionRes.json();
+      const q = batch[0];
+
+      await fetch(`${baseUrl}/answer`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ session_id, question_id: q.id, option_id: q.options[0].id }),
+      });
+
+      const getRes = await fetch(`${baseUrl}/session/${session_id}`);
+      const body = await getRes.json();
+      expect(body.answers.length).toBe(1);
+      expect(body.answers[0].question_id).toBe(q.id);
+      expect(body.answers[0].prompt).toBe(q.prompt);
+      expect(body.answers[0].chosen_text).toBe(q.options[0].text);
+      expect(body.answers[0].targets).toEqual(q.options[0].targets);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("404s on an unknown session_id", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/session/not-real`);
+      expect(res.status).toBe(404);
+    } finally {
+      server.close();
+    }
+  });
+
+  // Regression test for a real bug caught by the Phase 6 browser smoke
+  // check: /web derives its "N of M" quiz progress display from
+  // round_size, and round_size must stay the round's TRUE starting size
+  // (quick_start_size) even mid-round — not shrink to whatever's left in
+  // the rebuilt queue, or a page refresh mid-quiz would show a wrong,
+  // shrinking total instead of preserving progress.
+  it("round_size stays the round's true starting size after some (but not all) answers", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const sessionRes = await fetch(`${baseUrl}/session`, { method: "POST" });
+      const { session_id, batch: firstBatch } = await sessionRes.json();
+
+      for (let i = 0; i < 3; i++) {
+        const getRes = await fetch(`${baseUrl}/session/${session_id}`);
+        const { batch } = await getRes.json();
+        const q = batch[0];
+        await fetch(`${baseUrl}/answer`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ session_id, question_id: q.id, option_id: q.options[0].id }),
+        });
+      }
+
+      const getRes = await fetch(`${baseUrl}/session/${session_id}`);
+      const body = await getRes.json();
+      expect(body.batch.length).toBeLessThan(firstBatch.length);
+      expect(body.round_size).toBe(DEFAULT_QUIZ_CONFIG.quick_start_size);
+    } finally {
+      server.close();
+    }
+  });
+});
+
+describe("POST /session/:id/freeze", () => {
+  it("freezes a session and blocks further answers", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const sessionRes = await fetch(`${baseUrl}/session`, { method: "POST" });
+      const { session_id, batch } = await sessionRes.json();
+
+      const freezeRes = await fetch(`${baseUrl}/session/${session_id}/freeze`, { method: "POST" });
+      expect(freezeRes.status).toBe(200);
+      expect((await freezeRes.json()).frozen).toBe(true);
+
+      const getRes = await fetch(`${baseUrl}/session/${session_id}`);
+      expect((await getRes.json()).frozen).toBe(true);
+
+      const q = batch[0];
+      const answerRes = await fetch(`${baseUrl}/answer`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ session_id, question_id: q.id, option_id: q.options[0].id }),
+      });
+      expect(answerRes.status).toBe(409);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("404s on an unknown session_id", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/session/not-real/freeze`, { method: "POST" });
+      expect(res.status).toBe(404);
+    } finally {
+      server.close();
+    }
+  });
+});
+
 describe("POST /compile", () => {
   it("compiles a valid prompt (with disclaimer) even before any answers", async () => {
     const { server, baseUrl } = await startEphemeral(app);
@@ -141,6 +286,41 @@ describe("POST /twin/chat", () => {
       const body = await chatRes.json();
       expect(body.provider).toBe("mock");
       expect(typeof body.reply).toBe("string");
+    } finally {
+      server.close();
+    }
+  });
+
+  it("honors a client-chosen provider override (still the mock path, no real call)", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const sessionRes = await fetch(`${baseUrl}/session`, { method: "POST" });
+      const { session_id } = await sessionRes.json();
+
+      const chatRes = await fetch(`${baseUrl}/twin/chat`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ session_id, message: "hi", provider: "mock" }),
+      });
+      expect(chatRes.status).toBe(200);
+      expect((await chatRes.json()).provider).toBe("mock");
+    } finally {
+      server.close();
+    }
+  });
+
+  it("rejects an unrecognized provider value", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const sessionRes = await fetch(`${baseUrl}/session`, { method: "POST" });
+      const { session_id } = await sessionRes.json();
+
+      const chatRes = await fetch(`${baseUrl}/twin/chat`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ session_id, message: "hi", provider: "totally-not-a-provider" }),
+      });
+      expect(chatRes.status).toBe(400);
     } finally {
       server.close();
     }

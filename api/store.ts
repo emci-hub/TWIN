@@ -30,6 +30,7 @@ export interface Store {
     answer: { question_id: string; option_id: string; source: string },
   ): Promise<void>;
   saveProfileSnapshot(sessionId: string, profile: Profile): Promise<void>;
+  freezeSession(sessionId: string): Promise<void>;
 }
 
 export class MemoryStore implements Store {
@@ -64,6 +65,12 @@ export class MemoryStore implements Store {
 
   async saveProfileSnapshot(sessionId: string, profile: Profile): Promise<void> {
     this.snapshots.set(sessionId, profile);
+  }
+
+  async freezeSession(sessionId: string): Promise<void> {
+    const row = this.sessions.get(sessionId);
+    if (!row) throw new Error(`unknown session ${sessionId}`);
+    row.frozen = true;
   }
 
   /** Test/debug helper — not part of the Store interface. */
@@ -114,6 +121,13 @@ export class PostgresStore implements Store {
     await getPool().query(
       "update sessions set profile_snapshot = $2, updated_at = now() where id = $1",
       [sessionId, JSON.stringify(profile)],
+    );
+  }
+
+  async freezeSession(sessionId: string): Promise<void> {
+    await getPool().query(
+      "update sessions set frozen = true, updated_at = now() where id = $1",
+      [sessionId],
     );
   }
 }

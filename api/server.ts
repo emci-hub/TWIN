@@ -5,11 +5,33 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
-import { QuizSession, compileTwinPrompt } from "../core/index.js";
-import type { Store } from "./store.js";
+import { QuizSession, compileTwinPrompt, QUESTION_BANK, DIMENSIONS_CONTENT } from "../core/index.js";
+import type { Store, StoredAnswer } from "./store.js";
 import { checkAndReserveQuota } from "./quota-guard.js";
-import { generateTwinReply } from "./llm/index.js";
+import { generateTwinReply, isKnownProvider } from "./llm/index.js";
 import { ACTIVE_PROVIDER, TWIN_CHAT_MAX_MESSAGE_LENGTH, INBOUND_RATE_LIMIT } from "./config.js";
+
+/**
+ * Resolves each stored (question_id, option_id) pair back to the question
+ * bank content — prompt, chosen option text, and the {dim, direction,
+ * strength} evidence it produced. This is what powers the Results/"Why"
+ * screens (Phase 6) without /web needing its own copy of question content.
+ */
+function resolveAnswerEvidence(answers: StoredAnswer[]) {
+  return answers.map((a) => {
+    const question = QUESTION_BANK.find((q) => q.id === a.question_id);
+    const option = question?.options.find((o) => o.id === a.option_id);
+    return {
+      question_id: a.question_id,
+      option_id: a.option_id,
+      source: a.source,
+      created_at: a.created_at,
+      prompt: question?.prompt ?? null,
+      chosen_text: option?.text ?? null,
+      targets: option?.targets ?? [],
+    };
+  });
+}
 
 /**
  * Raw answers are the source of truth (docs/CORE.md) — this rebuilds the
@@ -54,6 +76,13 @@ export function createServer(store: Store): Express {
     res.json({ ok: true, provider: ACTIVE_PROVIDER });
   });
 
+  // Dimension labels/axis text (id/label/low/high) — a passthrough of
+  // /core/content/dimensions.json, so /web can render nice trait labels
+  // without keeping its own duplicate copy of that content.
+  app.get("/dimensions", (_req, res) => {
+    res.json({ dimensions: DIMENSIONS_CONTENT });
+  });
+
   app.post("/session", async (_req, res) => {
     const sessionRow = await store.createSession();
     const quiz = new QuizSession();
@@ -64,7 +93,50 @@ export function createServer(store: Store): Express {
       batch,
       profile: quiz.profile,
       done: quiz.isDone,
+      round_size: quiz.roundSize,
     });
+  });
+
+  // Read-only — rebuilds and returns the current session state without
+  // applying anything. Needed so the web app can show the real empty/filled
+  // Home state, Results, the "Why" evidence trail, and resume an
+  // in-progress quiz after a page refresh, all without answering a
+  // question just to find out where things stand.
+  app.get("/session/:id", async (req, res) => {
+    const sessionId = req.params.id;
+    const sessionRow = await store.getSession(sessionId);
+    if (!sessionRow) {
+      res.status(404).json({ error: "unknown session_id" });
+      return;
+    }
+
+    const quiz = await rebuildSession(store, sessionId);
+    const answers = await store.listAnswers(sessionId);
+
+    res.json({
+      session_id: sessionId,
+      profile: quiz.profile,
+      phase: quiz.phaseName,
+      batch: quiz.currentBatch(),
+      done: quiz.isDone,
+      stop_reason: quiz.stopReason,
+      round_size: quiz.roundSize,
+      frozen: sessionRow.frozen,
+      answers: resolveAnswerEvidence(answers),
+    });
+  });
+
+  // Freezes a session — docs/CORE.md's "Profile freeze" rule. Stops ALL
+  // further evidence (gate-approved or not) from moving the profile.
+  app.post("/session/:id/freeze", async (req, res) => {
+    const sessionId = req.params.id;
+    const sessionRow = await store.getSession(sessionId);
+    if (!sessionRow) {
+      res.status(404).json({ error: "unknown session_id" });
+      return;
+    }
+    await store.freezeSession(sessionId);
+    res.json({ session_id: sessionId, frozen: true });
   });
 
   app.post("/answer", async (req, res) => {
@@ -77,6 +149,10 @@ export function createServer(store: Store): Express {
     const sessionRow = await store.getSession(session_id);
     if (!sessionRow) {
       res.status(404).json({ error: "unknown session_id" });
+      return;
+    }
+    if (sessionRow.frozen) {
+      res.status(409).json({ error: "this profile is frozen — no new evidence is being accepted" });
       return;
     }
 
@@ -117,6 +193,7 @@ export function createServer(store: Store): Express {
       phase: quiz.phaseName,
       done: quiz.isDone,
       stop_reason: quiz.stopReason,
+      round_size: quiz.roundSize,
     });
   });
 
@@ -139,7 +216,7 @@ export function createServer(store: Store): Express {
   });
 
   app.post("/twin/chat", twinChatLimiter, async (req, res) => {
-    const { session_id, message } = req.body ?? {};
+    const { session_id, message, provider } = req.body ?? {};
 
     if (!session_id || typeof message !== "string" || message.trim().length === 0) {
       res.status(400).json({ error: "session_id and a non-empty message are required" });
@@ -151,6 +228,13 @@ export function createServer(store: Store): Express {
       });
       return;
     }
+    // Optional per-call provider choice (Phase 6 Settings screen). Falls
+    // back to the server's configured default when omitted/unrecognized —
+    // never silently ignored, but also never trusted blindly.
+    if (provider !== undefined && !isKnownProvider(provider)) {
+      res.status(400).json({ error: `unknown provider "${provider}"` });
+      return;
+    }
 
     const sessionRow = await store.getSession(session_id);
     if (!sessionRow) {
@@ -158,8 +242,10 @@ export function createServer(store: Store): Express {
       return;
     }
 
-    // Outbound quota guard — runs BEFORE the provider is ever called.
-    const quota = checkAndReserveQuota();
+    // Outbound quota guard — runs BEFORE the provider is ever called. Keyed
+    // on whichever provider will actually be used, so a client-chosen
+    // provider is still fully subject to its own limits/hard cap.
+    const quota = checkAndReserveQuota(provider);
     if (!quota.allowed) {
       res.status(429).json({ error: "twin's resting, try again shortly", reason: quota.reason });
       return;
@@ -168,7 +254,7 @@ export function createServer(store: Store): Express {
     const quiz = await rebuildSession(store, session_id);
 
     try {
-      const result = await generateTwinReply(quiz.profile, message);
+      const result = await generateTwinReply(quiz.profile, message, provider);
       res.json(result);
     } catch (err) {
       res.status(502).json({

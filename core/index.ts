@@ -61,6 +61,7 @@ export {
   findBannedWords,
   CONFIDENCE_THRESHOLD,
   BANNED_WORDS,
+  DIMENSIONS_CONTENT,
   type CompiledTwin,
   type CompiledDimensionLine,
   type TwinCopy,

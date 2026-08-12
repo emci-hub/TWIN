@@ -13,7 +13,7 @@ screens — it's the real product; everything else is a face on it.
 | 3 | Question delivery (Quick Start + sharpen batches) | ✅ done |
 | 4 | Twin compiler ⭐ | ✅ done |
 | 5 | API (twin chat via swappable provider adapter: Anthropic / OpenRouter) | ✅ done |
-| 6 | Web app (ports `docs/mockup.html` — quiz, results, "why", twin chat, Home) | pending |
+| 6 | Web app (ports `docs/mockup.html` — quiz, results, "why", twin chat, Home) | ✅ done |
 | 7 | Deploy | pending |
 
 Copy-paste prompts + a test for each: `docs/BUILD.md`.

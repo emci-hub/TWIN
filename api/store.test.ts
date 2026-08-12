@@ -40,6 +40,19 @@ describe("MemoryStore", () => {
     await store.saveProfileSnapshot(session.id, fakeProfile as never);
     expect(store.getSnapshot(session.id)).toEqual(fakeProfile);
   });
+
+  it("freezes a session", async () => {
+    const store = new MemoryStore();
+    const session = await store.createSession();
+    expect((await store.getSession(session.id))!.frozen).toBe(false);
+    await store.freezeSession(session.id);
+    expect((await store.getSession(session.id))!.frozen).toBe(true);
+  });
+
+  it("throws when freezing an unknown session", async () => {
+    const store = new MemoryStore();
+    await expect(store.freezeSession("not-real")).rejects.toThrow();
+  });
 });
 
 // Only runs against a real database when DATABASE_URL is set — skipped
@@ -85,5 +98,12 @@ describe.skipIf(!process.env.DATABASE_URL)("PostgresStore (live DB)", () => {
     // and the row still exists afterward
     const row = await store.getSession(session.id);
     expect(row).not.toBeNull();
+  });
+
+  it("freezes a session in Postgres", async () => {
+    const session = await store.createSession();
+    await store.freezeSession(session.id);
+    const row = await store.getSession(session.id);
+    expect(row!.frozen).toBe(true);
   });
 });

@@ -271,6 +271,20 @@ export class QuizSession {
     return [...this.answeredIds];
   }
 
+  /**
+   * How many questions the CURRENT round (Quick Start, or this sharpen
+   * batch) started with — a structural constant from quiz-config.json, not
+   * derived from the live queue. Callers (the API, then /web) use this to
+   * draw an accurate "N of M" progress indicator that survives a page
+   * refresh, since a freshly-rebuilt queue only ever reflects what's LEFT
+   * to answer, not the round's original size.
+   */
+  get roundSize(): number {
+    return this.phase === "sharpen"
+      ? this.config.sharpen_batch_size
+      : this.config.quick_start_size;
+  }
+
   /** The batch currently being shown — Quick Start's set, or the current sharpen batch. */
   currentBatch(): Question[] {
     this.advanceIfQueueEmpty();

@@ -37,6 +37,9 @@ export interface TwinCopy {
 const DIMENSIONS = dimensionsData as DimensionCopy[];
 const TWIN_COPY = twinCopyData as TwinCopy;
 
+/** The raw dimensions.json content (id/label/low/high) — read-only export for callers like /api that need to display dimension text without duplicating content/dimensions.json. */
+export const DIMENSIONS_CONTENT: readonly DimensionCopy[] = DIMENSIONS;
+
 /** Locked rule (docs/CORE.md): dimensions below this confidence never reach the twin prompt. */
 export const CONFIDENCE_THRESHOLD = 0.35;
 

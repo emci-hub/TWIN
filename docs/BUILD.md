@@ -170,6 +170,9 @@ A real bug turned up during this: replaying stored answers to rebuild a session 
 ---
 
 ## Phase 6 — Web app
+✅ Done. `/web` (React 19 + Vite + Tailwind v4), a custom hash router (survives a page refresh), `theme.css` ported from `docs/mockup.html`'s CSS variables, `lib/api.ts` (typed API client, capped retries), `lib/SessionContext.tsx` (anonymous localStorage session, always re-fetches canonical state after a mutation), and the 6 real screens: Home, Quiz (Quick Start + Sharpen combined — see deviation below), Results, Why, Chat, Settings.
+
+**Deviation, flagged not silent:** to make every screen real (not a mock toggle) against Phase 5's original 4 endpoints, `/api` gained 4 small additions: `GET /dimensions` (dimension label/low/high text, so `/web` never duplicates `/core/content/dimensions.json`), `GET /session/:id` (read-only state for Home's empty/filled state, Results, Why, and resuming after a refresh), `POST /session/:id/freeze` (+ `/answer`'s new 409-if-frozen check, for Settings), and an optional `provider` override on `/twin/chat` (for Settings' AI-provider choice). All four are covered by new Vitest tests. Quick Start and Sharpen were also combined into one `Quiz` screen whose title adapts to the live phase, rather than two nav items pointing at the same underlying state.
 
 Build the real screens from `docs/mockup.html` — port its layout, components, and Minimal/Neon theme. Don't redesign it.
 
@@ -182,6 +185,8 @@ Give complete files.
 ```
 
 **Test it:** finish a quiz in the browser — it stops itself, a refresh mid-quiz keeps progress. Home shows the real empty state before answering anything, and the real profile after.
+
+**Verification notes:** verified for real in headless Chromium (`web/scripts/playwright-smoke.mjs`, `npm run smoke` from `/web`), not just asserted — against a real running API (`LLM_PROVIDER=mock`) and a real running Vite dev server. It drove: Home's empty state before any answers → name entry → the Quick Start quiz → a page refresh mid-quiz (hash stays `#quiz`, progress text unchanged) → the quiz finishing itself → Home's filled state → all 12 Results rows → the Why trail → a twin chat reply → the theme toggle → freezing the profile and confirming it blocks further answers. A real bug turned up during this run and was root-caused, not papered over: progress after a mid-quiz refresh read "1 of 9" instead of "4 of 12" — the client was deriving the round's total size from the live batch length, which after a refresh only reflects what's *left* to answer, not the round's true starting size. Fixed by adding a `roundSize` getter to `QuizSession` (a structural constant from `quiz-config.json`, not derived from the queue) and threading it through `/session`, `/answer`, and `/session/:id` as `round_size`; covered by new tests in both `/core` and `/api`. `/core` is now 44 Vitest tests (was 42), `/api` is 42 (was 41 after Phase 6's 4 API additions, which had already brought it from 30 → 41). `tsc -b` and `npm run build` are both clean for `/web`.
 
 ---
 
