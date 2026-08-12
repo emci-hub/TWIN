@@ -13,8 +13,10 @@ screens — it's the real product; everything else is a face on it.
 | 3 | Question delivery (Quick Start + sharpen batches) | pending |
 | 4 | Twin compiler ⭐ | pending |
 | 5 | API (twin chat via swappable provider adapter: Anthropic / OpenRouter) | pending |
-| 6 | Web app (quiz + results + "why" + twin chat, one build) | pending |
+| 6 | Web app (ports `docs/mockup.html` — quiz, results, "why", twin chat, Home) | pending |
 | 7 | Deploy | pending |
+
+Copy-paste prompts + a test for each: `docs/BUILD.md`.
 
 ## Later / post-MVP
 
@@ -28,10 +30,9 @@ screens — it's the real product; everything else is a face on it.
 | Multiplayer party games | Quiplash-style, builds on "Arena mode," Supabase Realtime |
 | iOS app | SwiftUI, same API, no scoring logic in Swift |
 
-See `/TwinArchitect_Plan_v3.md` (delivered separately) for full reasoning and
-free-tier details, `docs/ARCHITECTURE.md` for the evidence-gate flow and trust
-tiers, and `twinarchitect_mockup.html` for a clickable visual mockup of every
-screen.
+See `docs/BUILD.md` for the phase-by-phase build prompts, `docs/ARCHITECTURE.md`
+for the evidence-gate flow and trust tiers, and `docs/mockup.html` for a
+clickable visual mockup of every screen (both themes).
 
 ## Anti-drift check
 After Phases 2, 4, and before launch: open a fresh Claude session, point it at

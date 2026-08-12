@@ -16,15 +16,18 @@ Read `docs/CORE.md` and `docs/STACK.md` before writing anything. In short:
 4. Give complete, runnable files, not fragments.
 5. Confirm what already exists (check `docs/PHASES.md`) before writing new code.
 
-See `docs/PHASES.md` for what's built and what's next, and
-`docs/CORE.md` / `docs/STACK.md` for the rules and tooling those phases must follow.
+See `docs/BUILD.md` for the actual copy-paste prompts (one phase at a time, with
+a test after each), `docs/PHASES.md` for a quick status table, and
+`docs/CORE.md` / `docs/STACK.md` / `docs/ARCHITECTURE.md` for the rules those
+phases follow.
 
 ## Folders
 
 - `/core` — scoring + twin logic + tests (plain TypeScript, Vitest). The real product.
 - `/api` — Node + Express, imports `/core`, never reimplements it.
 - `/web` — React + Vite + Tailwind. A screen on top of `/api`.
-- `/docs` — the rules (`CORE.md`, `STACK.md`) and progress (`PHASES.md`).
+- `/docs` — the rules (`CORE.md`, `STACK.md`, `ARCHITECTURE.md`), the build
+  prompts (`BUILD.md`), progress (`PHASES.md`), and the UI reference (`mockup.html`).
 - `/ios` — later. SwiftUI, calls the same `/api`.
 - `/validation` — simulations and audits (Phase 10+).
 

@@ -13,7 +13,7 @@ Input → Adapter → Evidence Gate → Scoring engine (locked) → Profile → 
    evidence always has: `{dimension, direction, strength}`. A quiz answer and a
    game answer are indistinguishable past this point.
 3. **Evidence Gate** (`/core/evidence-gate`) — checks the source against
-   `/core/evidence-sources.json`: is this source allowed to touch the profile at
+   `/core/content/evidence-sources.json`: is this source allowed to touch the profile at
    all (`feeds_profile`), and if so, capped at what max strength (`trust_tier`)?
    New sources default to `feeds_profile: false`. Nothing reaches scoring without
    passing this.
