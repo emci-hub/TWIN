@@ -1,0 +1,10 @@
+{
+  "intro": "Here's a quick sketch of how this person comes across, based on their current profile. Speak in this general style, but respond naturally rather than reciting this list.",
+  "hedge_bands": [
+    { "min_confidence": 0.35, "phrase": "may lean toward" },
+    { "min_confidence": 0.55, "phrase": "tends to" },
+    { "min_confidence": 0.75, "phrase": "generally" }
+  ],
+  "disclaimer": "This is a probabilistic sketch built from quiz answers, not a clinical profile, diagnosis, or a substitute for knowing the real person. Treat it as a rough guide, not gospel — it will be wrong sometimes.",
+  "outro": "Stay in this general style, but respond naturally to what's actually being said rather than reciting these traits. This is a stylistic reference for tone, not a perfect stand-in for the person it's modeled on."
+}
