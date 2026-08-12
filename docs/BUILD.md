@@ -21,6 +21,17 @@ kept apart. No further merges without losing "one clean test per phase."
 "no hardcoded content" rule — folded into `docs/CORE.md` and the phases below,
 since it's a rule, not new work.
 
+**Resource check (latest pass):** building here (this chat) is uncapped — spend
+whatever credit it takes to get each phase right. The *running app* is a
+different budget: nothing it calls may be hardcoded in a way that's hard to
+change later (model names, provider URLs, limit numbers all live in
+`/api/config.ts` or env vars — see `docs/CORE.md`), every outbound AI call goes
+through a quota guard before it fires (Phase 5), and nothing in the design
+polls or retries unboundedly — the quiz has a stop rule, retries are capped,
+and anything live later pushes updates instead of polling. Verified against
+the current phase list below; two fixes landed in Phase 5 as a result (the
+quota guard and the retry cap).
+
 ---
 
 ## Phase 0 — Setup
@@ -75,11 +86,12 @@ Build Phase 3 (Question delivery) of TwinArchitect in /core, using /core/content
 1. Quick Start: ~8 questions, covering all 12 dimensions at least once.
 2. Sharpen batches: ~6 questions each, targeting the lowest-confidence dimensions.
 3. Stop rule: stop when overall confidence hits target, or max questions reached.
+4. Never re-select a question_id already in this session's answered list.
 Add a test simulating (a) a consistent answerer, (b) a random answerer.
 Give complete files.
 ```
 
-**Test it:** consistent sim reaches target confidence in a sensible number of questions; random sim stays low or hits the max.
+**Test it:** consistent sim reaches target confidence in a sensible number of questions; random sim stays low or hits the max. Confirm no question_id repeats across a full simulated run.
 
 ---
 
@@ -103,7 +115,7 @@ Give complete files.
 
 ## Phase 5 — API
 
-Node + Express, imports `/core`, never reimplements it. Twin chat goes through a swappable AI adapter.
+Node + Express, imports `/core`, never reimplements it. Twin chat goes through a swappable AI adapter with a hard quota guard in front of it — nothing calls out uncapped.
 
 ```
 Build Phase 5 (API) of TwinArchitect in /api (Node + Express), importing /core.
@@ -112,13 +124,20 @@ Endpoints:
 - POST /answer -> updated profile + next question (evidence passed through the Evidence Gate)
 - POST /compile -> the twin prompt
 - POST /twin/chat -> proxies the twin chat AI (key server-side only)
-Twin chat: implement generateTwinReply(profile, message) behind an env var LLM_PROVIDER=anthropic|openrouter — two swappable implementations; /core and /web never know which is active.
-Add a message-length cap and a basic per-session rate limit on /twin/chat.
+
+Twin chat AI, swappable:
+1. /api/config.ts — provider name, model name/version, and each provider's free-tier call limits (requests/min, requests/day) as named constants. Nothing about a provider hardcoded anywhere else.
+2. generateTwinReply(profile, message), behind env var LLM_PROVIDER=anthropic|openrouter — two swappable implementations; /core and /web never know which is active.
+3. A quota guard that runs BEFORE every provider call: tracks calls made this minute/day (Postgres or in-memory counter is fine), checks against /api/config.ts's limit for the active provider, and refuses with a friendly "twin's resting, try again shortly" instead of calling through over the limit. For the anthropic provider specifically, also enforce a configurable hard daily-call cap so nothing can run past the Claude credit unattended.
+4. express-rate-limit (free npm package) on /twin/chat for inbound abuse — separate from the outbound quota guard above.
+5. A message-length cap on /twin/chat.
+6. Any client retry logic gets a max-attempt cap (e.g. 3) — never unbounded/infinite retries.
+
 Save raw answers + profile to Postgres (Supabase).
 Give complete files + a test script that runs a full quiz over HTTP.
 ```
 
-**Test it:** the script runs start → finish → compile with no errors. Switch `LLM_PROVIDER` and confirm both paths respond.
+**Test it:** the script runs start → finish → compile with no errors. Switch `LLM_PROVIDER` and confirm both paths respond. Then manually drop the daily-call cap to 1 in config, call `/twin/chat` twice, and confirm the second call is refused instead of hitting the provider.
 
 ---
 
