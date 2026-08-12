@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TwinArchitect — Mockup</title>
+<style>
+  .app-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --muted:          #898781;
+    --gridline:       #e1e0d9;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6;
+    --seq-150:        #b7d3f6;
+    --seq-300:        #6da7ec;
+    --seq-450:        #2a78d6;
+    --seq-600:        #184f95;
+    --status-good:    #0ca30c;
+    --status-warning: #fab219;
+    --status-serious: #ec835a;
+    --status-critical:#d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .app-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --muted:          #898781;
+      --gridline:       #2c2c2a;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --seq-150:        #184f95;
+      --seq-300:        #256abf;
+      --seq-450:        #3987e5;
+      --seq-600:        #6da7ec;
+    }
+  }
+  :root[data-theme="dark"] .app-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted:          #898781;
+    --gridline:       #2c2c2a;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --seq-150:        #184f95;
+    --seq-300:        #256abf;
+    --seq-450:        #3987e5;
+    --seq-600:        #6da7ec;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .app-root { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 232px; flex-shrink: 0;
+    background: var(--surface-1);
+    border-right: 1px solid var(--border);
+    padding: 20px 12px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .brand { display:flex; align-items:center; gap:8px; padding: 4px 10px 18px; }
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--series-1), var(--seq-600));
+    flex-shrink:0;
+  }
+  .brand-name { font-weight: 600; font-size: 15px; }
+  .nav-group-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); padding: 14px 10px 6px;
+  }
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    width:100%; text-align:left; border:none; background:transparent;
+    color: var(--text-secondary); font-size: 13.5px;
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+  }
+  .nav-item:hover { background: var(--page); }
+  .nav-item.active { background: var(--seq-150); color: var(--text-primary); font-weight: 600; }
+  .nav-item .dot { width:6px; height:6px; border-radius:50%; background: var(--muted); flex-shrink:0; }
+  .nav-item.active .dot { background: var(--series-1); }
+
+  /* Main */
+  .main { flex: 1; min-width:0; display:flex; flex-direction:column; }
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: var(--surface-1);
+  }
+  .topbar-title { font-size: 14px; font-weight:600; color: var(--text-primary); }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
+  .pill {
+    font-size: 11px; padding: 4px 9px; border-radius: 999px;
+    background: var(--page); border: 1px solid var(--border); color: var(--muted);
+  }
+  .theme-btn {
+    border:1px solid var(--border); background: var(--page); color: var(--text-secondary);
+    border-radius: 8px; padding: 6px 10px; font-size:12px; cursor:pointer;
+  }
+  .content { padding: 28px; max-width: 920px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  h1.screen-title { font-size: 20px; margin: 0 0 4px; }
+  .screen-sub { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 22px; }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px; margin-bottom: 16px;
+  }
+  .btn {
+    border: 1px solid var(--border); background: var(--surface-1);
+    color: var(--text-primary); padding: 10px 16px; border-radius: 9px;
+    font-size: 13.5px; cursor: pointer; font-weight: 500;
+  }
+  .btn-primary { background: var(--series-1); color: #fff; border-color: transparent; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-row { display:flex; gap:10px; flex-wrap:wrap; }
+
+  /* Meters */
+  .meter-row { padding: 12px 0; border-bottom: 1px solid var(--gridline); }
+  .meter-row:last-child { border-bottom: none; }
+  .meter-labels { display:flex; justify-content:space-between; font-size:12.5px; color: var(--text-secondary); margin-bottom:6px; }
+  .meter-track { height: 8px; border-radius: 999px; background: var(--gridline); position: relative; }
+  .meter-fill { height: 8px; border-radius: 999px; background: var(--series-1); }
+  .meter-meta { display:flex; justify-content:space-between; margin-top:6px; font-size: 11.5px; color: var(--muted); }
+  .meter-row.dim .meter-fill { background: var(--seq-300); opacity: .5; }
+  .meter-row.dim .meter-meta { color: var(--status-warning); }
+  .trait-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+  @media (max-width: 720px) { .trait-grid { grid-template-columns: 1fr; } }
+
+  .chip {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size: 11px; padding: 3px 9px; border-radius: 999px;
+    background: var(--page); border: 1px solid var(--border); color: var(--text-secondary);
+  }
+  .chip-dot { width:6px; height:6px; border-radius:50%; }
+
+  /* Quiz card */
+  .quiz-progress { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .quiz-progress .bar { flex:1; height:6px; border-radius:999px; background: var(--gridline); overflow:hidden; }
+  .quiz-progress .bar > div { height:100%; background: var(--series-1); }
+  .quiz-question { font-size: 17px; font-weight: 600; margin: 0 0 18px; }
+  .quiz-options { display:grid; gap:10px; }
+  .quiz-option {
+    text-align:left; padding: 14px 16px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--page);
+    color: var(--text-primary); font-size: 13.5px; cursor:pointer;
+  }
+  .quiz-option:hover { border-color: var(--series-1); }
+
+  /* Chat */
+  .chat-disclaimer {
+    font-size: 12px; color: var(--text-secondary); background: var(--page);
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+  }
+  .chat-scroll { display:flex; flex-direction:column; gap:10px; margin-bottom: 14px; }
+  .bubble { max-width: 72%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height:1.45; }
+  .bubble.user { align-self:flex-end; background: var(--series-1); color:#fff; border-bottom-right-radius:4px; }
+  .bubble.twin { align-self:flex-start; background: var(--page); border:1px solid var(--border); border-bottom-left-radius:4px; }
+  .chat-input-row { display:flex; gap:8px; }
+  .chat-input-row input {
+    flex:1; padding: 10px 14px; border-radius: 10px; border:1px solid var(--border);
+    background: var(--page); color: var(--text-primary); font-size: 13.5px;
+  }
+
+  /* Why screen */
+  .evidence-item { display:flex; justify-content:space-between; gap:12px; padding: 12px 0; border-bottom:1px solid var(--gridline); font-size: 13px; }
+  .evidence-item:last-child { border-bottom:none; }
+  .evidence-text { color: var(--text-primary); }
+  .evidence-meta { color: var(--muted); font-size: 11.5px; margin-top:3px; }
+
+  /* Upload */
+  .dropzone {
+    border: 1.5px dashed var(--border); border-radius: 12px; padding: 34px 20px;
+    text-align:center; color: var(--text-secondary); font-size: 13.5px; background: var(--page);
+  }
+  .signal-tag { display:inline-flex; margin: 4px 6px 0 0; }
+
+  /* Multiplayer */
+  .avatar-row { display:flex; gap:10px; margin-bottom: 16px; }
+  .avatar { width: 34px; height:34px; border-radius: 50%; background: var(--seq-300); display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff; font-weight:600; }
+  .answer-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--gridline); font-size:13.5px; }
+  .answer-row:last-child{border-bottom:none;}
+  .vote-btn { border:1px solid var(--border); background:var(--page); border-radius:8px; padding:4px 10px; font-size:12px; cursor:pointer; color:var(--text-secondary); }
+
+  /* Toggle */
+  .switch-row { display:flex; align-items:center; justify-content:space-between; padding: 12px 0; border-bottom: 1px solid var(--gridline); }
+  .switch-row:last-child{border-bottom:none;}
+  .switch { width: 38px; height: 22px; border-radius: 999px; background: var(--gridline); position:relative; flex-shrink:0; cursor:pointer; }
+  .switch.on { background: var(--series-1); }
+  .switch .knob { width:18px; height:18px; border-radius:50%; background:#fff; position:absolute; top:2px; left:2px; transition: left .15s; }
+  .switch.on .knob { left: 18px; }
+  .radio-row { display:flex; align-items:center; gap:10px; padding: 10px 0; }
+  .radio-dot { width:16px; height:16px; border-radius:50%; border:1.5px solid var(--border); flex-shrink:0; position:relative; }
+  .radio-dot.sel::after { content:""; position:absolute; inset:3px; border-radius:50%; background: var(--series-1); }
+
+  /* System overview */
+  .flow { display:flex; align-items:stretch; gap:8px; overflow-x:auto; padding-bottom: 8px; }
+  .flow-box {
+    min-width: 128px; background: var(--surface-1); border:1px solid var(--border);
+    border-radius: 12px; padding: 12px; font-size:12px; text-align:center;
+    display:flex; flex-direction:column; justify-content:center; gap:4px;
+  }
+  .flow-box b { font-size: 12.5px; }
+  .flow-arrow { display:flex; align-items:center; color: var(--muted); font-size:16px; }
+  .locked-box { border-color: var(--series-1); background: var(--seq-150); }
+  .tier-table { width:100%; border-collapse: collapse; font-size: 13px; margin-top: 14px;}
+  .tier-table th { text-align:left; color: var(--muted); font-weight:500; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; padding: 6px 10px; border-bottom:1px solid var(--gridline); }
+  .tier-table td { padding: 10px; border-bottom: 1px solid var(--gridline); color: var(--text-secondary); }
+  .tier-table tr:last-child td { border-bottom:none; }
+
+  .section-label { font-size: 12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color: var(--muted); margin: 18px 0 8px; }
+
+  /* Home */
+  .home-greeting { display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px; flex-wrap:wrap; gap:10px; }
+  .name-row { display:flex; gap:8px; align-items:center; }
+  .name-row input {
+    padding: 8px 12px; border-radius: 9px; border:1px solid var(--border);
+    background: var(--page); color: var(--text-primary); font-size: 13.5px; width: 180px;
+  }
+  .sim-toggle-row { display:flex; align-items:center; gap:8px; font-size:12px; color: var(--muted); }
+  .empty-card { text-align:center; padding: 34px 24px; }
+  .empty-icon { font-size: 26px; margin-bottom: 10px; }
+  .empty-title { font-size: 15px; font-weight:600; margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; color: var(--text-secondary); max-width: 420px; margin: 0 auto 18px; }
+  .skip-link { display:block; margin-top: 12px; font-size: 12px; color: var(--muted); text-decoration: underline; cursor:pointer; background:none; border:none; }
+  .profile-summary-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+  .mini-meter-row { display:grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 18px; }
+  .mini-meter label { font-size: 11.5px; color: var(--text-secondary); display:block; margin-bottom:5px; }
+  .mini-meter .meter-track { height:6px; }
+  .mini-meter .meter-fill { height:6px; }
+  @media (max-width: 720px) { .mini-meter-row { grid-template-columns: 1fr 1fr; } }
+  .game-card-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .game-card-grid { grid-template-columns: 1fr; } }
+  .game-card { border:1px solid var(--border); border-radius:12px; padding:16px; background: var(--surface-1); }
+  .game-card.locked { opacity: .55; }
+  .game-card-title { font-weight:600; font-size:13.5px; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+  .game-card-desc { font-size:12.5px; color: var(--text-secondary); margin-bottom:12px; }
+  .home-footer-links { display:flex; gap:16px; margin-top: 6px; }
+  .home-footer-links a { font-size:12px; color: var(--muted); text-decoration:none; cursor:pointer; }
+  .home-footer-links a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="app-root">
+
+  <nav class="sidebar">
+    <div class="brand"><div class="brand-mark"></div><div class="brand-name">TwinArchitect</div></div>
+
+    <button class="nav-item active" data-target="s-home"><span class="dot"></span>Home</button>
+
+    <div class="nav-group-label">Build a profile</div>
+    <button class="nav-item" data-target="s-quiz"><span class="dot"></span>Quick Start quiz</button>
+    <button class="nav-item" data-target="s-sharpen"><span class="dot"></span>Sharpen batch</button>
+    <button class="nav-item" data-target="s-guess"><span class="dot"></span>Guess-your-twin game</button>
+    <button class="nav-item" data-target="s-upload"><span class="dot"></span>Social/writing upload</button>
+
+    <div class="nav-group-label">See it</div>
+    <button class="nav-item" data-target="s-results"><span class="dot"></span>Results</button>
+    <button class="nav-item" data-target="s-why"><span class="dot"></span>"Why" trail</button>
+    <button class="nav-item" data-target="s-chat"><span class="dot"></span>Twin chat</button>
+    <button class="nav-item" data-target="s-feedback"><span class="dot"></span>Feedback</button>
+
+    <div class="nav-group-label">Play</div>
+    <button class="nav-item" data-target="s-multiplayer"><span class="dot"></span>Multiplayer game</button>
+
+    <div class="nav-group-label">Manage</div>
+    <button class="nav-item" data-target="s-settings"><span class="dot"></span>Settings</button>
+    <button class="nav-item" data-target="s-overview"><span class="dot"></span>System overview</button>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Home</div>
+      <div class="topbar-right">
+        <span class="pill">Mockup — sample data, nothing is saved</span>
+        <button class="theme-btn" onclick="toggleTheme()">Toggle theme</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- HOME -->
+      <section class="screen active" id="s-home">
+        <div class="home-greeting">
+          <div>
+            <h1 class="screen-title" id="home-greeting-title">Hey there 👋</h1>
+            <p class="screen-sub" style="margin:0;">Everything lives here — your profile once it exists, games any time, settings always.</p>
+          </div>
+          <div id="name-row" class="name-row">
+            <input type="text" id="name-input" placeholder="What should we call you?">
+            <button class="btn btn-primary" onclick="setName()">Save</button>
+          </div>
+        </div>
+
+        <div class="sim-toggle-row">
+          <div class="switch" id="sim-switch" onclick="toggleSim()"><div class="knob"></div></div>
+          <span>Mockup control — preview: <b id="sim-label">profile not built yet</b></span>
+        </div>
+
+        <!-- Profile section: empty state -->
+        <div class="card empty-card" id="home-profile-empty">
+          <div class="empty-icon">🧩</div>
+          <div class="empty-title">Your profile hasn't been built yet</div>
+          <div class="empty-sub">Answer a quick quiz or upload a writing sample — either gets a first twin going in about two minutes. You can always add more later.</div>
+          <div class="btn-row" style="justify-content:center;">
+            <button class="btn btn-primary" onclick="go('s-quiz')">Answer questions (~8, 2 min)</button>
+            <button class="btn" onclick="go('s-upload')">Upload a writing sample instead</button>
+          </div>
+          <button class="skip-link" onclick="go('s-multiplayer')">Not now — just here to look around</button>
+        </div>
+
+        <!-- Profile section: filled state -->
+        <div class="card" id="home-profile-filled" style="display:none;">
+          <div class="profile-summary-top">
+            <span class="chip"><span class="chip-dot" style="background:var(--series-1)"></span>Clarity: Detailed · 62% overall</span>
+            <div class="btn-row">
+              <button class="btn" onclick="go('s-results')">View full profile</button>
+              <button class="btn btn-primary" onclick="go('s-chat')">Chat with your twin</button>
+            </div>
+          </div>
+          <div class="mini-meter-row" id="home-mini-meters"></div>
+        </div>
+
+        <div class="section-label">Games</div>
+        <div class="game-card-grid">
+          <div class="game-card" id="home-game-guess">
+            <div class="game-card-title">🎯 Guess-your-twin</div>
+            <div class="game-card-desc" id="home-game-guess-desc">Needs a profile first — this one calibrates against it.</div>
+            <button class="btn" onclick="go('s-guess')" id="home-game-guess-btn" disabled>Play</button>
+          </div>
+          <div class="game-card">
+            <div class="game-card-title">🎉 Party mode</div>
+            <div class="game-card-desc">Live, multiplayer, Quiplash-style. No profile needed — never affects one either.</div>
+            <button class="btn" onclick="go('s-multiplayer')">Play</button>
+          </div>
+        </div>
+
+        <div class="home-footer-links">
+          <a onclick="go('s-settings')">Settings</a>
+          <a onclick="go('s-overview')">How this all works</a>
+        </div>
+      </section>
+
+      <!-- QUICK START QUIZ -->
+      <section class="screen" id="s-quiz">
+        <h1 class="screen-title">Quick Start</h1>
+        <p class="screen-sub">Forced-choice — pick whichever feels closer, neither option is "right."</p>
+        <div class="card">
+          <div class="quiz-progress">
+            <span class="chip">Clarity: Sketch</span>
+            <div class="bar"><div style="width:37%"></div></div>
+            <span style="font-size:12px;color:var(--muted)">Q3 of 8</span>
+          </div>
+          <div class="quiz-question">When plans fall through last-minute, I'm more likely to...</div>
+          <div class="quiz-options">
+            <button class="quiz-option">Feel unsettled until I've got a new plan locked in</button>
+            <button class="quiz-option">Shrug and see what else the day turns into</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SHARPEN BATCH -->
+      <section class="screen" id="s-sharpen">
+        <h1 class="screen-title">Sharpen: Ambiguity Tolerance</h1>
+        <p class="screen-sub">Optional — short batches that target whichever trait is least confident right now.</p>
+        <div class="card">
+          <div class="quiz-progress">
+            <span class="chip">Targeting: ambiguity_tolerance (33% confidence)</span>
+            <div class="bar"><div style="width:33%"></div></div>
+            <span style="font-size:12px;color:var(--muted)">Q2 of 6</span>
+          </div>
+          <div class="quiz-question">A project brief with no clear deadline or spec feels...</div>
+          <div class="quiz-options">
+            <button class="quiz-option">Stressful — I'd rather someone define the edges first</button>
+            <button class="quiz-option">Kind of freeing — I'll figure out the shape as I go</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- GUESS YOUR TWIN -->
+      <section class="screen" id="s-guess">
+        <h1 class="screen-title">Guess-your-twin</h1>
+        <p class="screen-sub">The app predicts your twin's answer — you confirm. Doubles as calibration.</p>
+        <div class="card">
+          <div class="quiz-question">Your twin's guess: "Would rather text than call."</div>
+          <div class="btn-row" style="margin-bottom:16px;">
+            <button class="btn">✓ Matches me</button>
+            <button class="btn">✗ Not quite</button>
+          </div>
+          <div class="card" style="background:var(--page);margin:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;">Result: <b>Match</b> — reinforces existing direction, doesn't add a new one</span>
+              <span class="chip"><span class="chip-dot" style="background:var(--status-good)"></span>Feeds profile: reinforce-only</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SOCIAL UPLOAD -->
+      <section class="screen" id="s-upload">
+        <h1 class="screen-title">Add a writing sample</h1>
+        <p class="screen-sub">A screenshot of your own bio/captions — read for content, never for appearance. Self or consenting-invite only.</p>
+        <div class="card">
+          <div class="dropzone">📎 Drop a screenshot here, or upload Meta's "Download Your Information" export</div>
+          <label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-size:12.5px;color:var(--text-secondary);">
+            <input type="checkbox" checked style="margin-top:2px;"> I confirm this is my own account, or I have this person's permission.
+          </label>
+        </div>
+        <div class="card">
+          <div class="section-label" style="margin-top:0;">Extracted signals (preview)</div>
+          <span class="chip signal-tag">bio: "trail runs + bad puns" → humor_dryness +weak</span>
+          <span class="chip signal-tag">captions mostly short → verbosity −weak</span>
+          <span class="chip signal-tag">frequent exclamation points → formality −weak</span>
+        </div>
+      </section>
+
+      <!-- RESULTS -->
+      <section class="screen" id="s-results">
+        <h1 class="screen-title">Alex's profile</h1>
+        <p class="screen-sub">
+          <span class="chip"><span class="chip-dot" style="background:var(--series-1)"></span>Clarity: Detailed · 62% overall</span>
+        </p>
+        <div class="card">
+          <div class="trait-grid" id="trait-grid"></div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);">Grayed rows are below the confidence floor — the twin won't voice these yet.</p>
+      </section>
+
+      <!-- WHY -->
+      <section class="screen" id="s-why">
+        <h1 class="screen-title">Why: Openness</h1>
+        <p class="screen-sub">Every trait traces back to the answers that produced it.</p>
+        <div class="card">
+          <div class="evidence-item">
+            <div>
+              <div class="evidence-text">"Explore five ideas loosely" over "master one idea deeply"</div>
+              <div class="evidence-meta">Quick Start · Q3 · weight: strong</div>
+            </div>
+            <span class="chip">Quiz</span>
+          </div>
+          <div class="evidence-item">
+            <div>
+              <div class="evidence-text">"Enjoy trying foods I can't pronounce" over "stick to what I know I like"</div>
+              <div class="evidence-meta">Sharpen batch · IPIP-adapted · weight: moderate</div>
+            </div>
+            <span class="chip">Quiz</span>
+          </div>
+          <div class="evidence-item">
+            <div>
+              <div class="evidence-text">Bio mentions trying a new hiking trail every month</div>
+              <div class="evidence-meta">Writing sample · weight: weak (capped)</div>
+            </div>
+            <span class="chip">Social</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TWIN CHAT -->
+      <section class="screen" id="s-chat">
+        <h1 class="screen-title">Chat with Alex's twin</h1>
+        <div class="chat-disclaimer">This is a hedged approximation built from Alex's answers — not Alex, and not a diagnosis.</div>
+        <div class="card">
+          <div class="chat-scroll">
+            <div class="bubble user">How would you handle a project with no clear deadline?</div>
+            <div class="bubble twin">Honestly, I'd probably lean into it rather than panic about it — though that's a rough sketch, I'm still not fully sure how I feel about ambiguity like that.</div>
+            <div class="bubble user">Would you rather text or call?</div>
+            <div class="bubble twin">Text, most likely. Take that as a fairly confident guess, not a certainty.</div>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" placeholder="Message the twin… (mockup, not functional)" disabled>
+            <button class="btn btn-primary">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEEDBACK -->
+      <section class="screen" id="s-feedback">
+        <h1 class="screen-title">Does this feel like you?</h1>
+        <p class="screen-sub">Per-trait feedback, saved with your session.</p>
+        <div class="card">
+          <div class="meter-row"><div class="meter-labels"><span>Openness</span><span>👍 👎</span></div></div>
+          <div class="meter-row"><div class="meter-labels"><span>Extraversion</span><span>👍 👎</span></div></div>
+          <div class="meter-row"><div class="meter-labels"><span>Directness</span><span>👍 👎</span></div></div>
+          <div class="btn-row" style="margin-top:14px;"><button class="btn btn-primary">Submit feedback</button></div>
+        </div>
+      </section>
+
+      <!-- MULTIPLAYER -->
+      <section class="screen" id="s-multiplayer">
+        <h1 class="screen-title">Party mode — Room FOX-217</h1>
+        <p class="screen-sub">Live, multiplayer, Quiplash-style.</p>
+        <div class="card">
+          <div class="avatar-row">
+            <div class="avatar">AL</div><div class="avatar">JM</div><div class="avatar">PR</div><div class="avatar">SK</div>
+          </div>
+          <div class="quiz-question" style="font-size:15px;">Fill in the blank: "The worst gift I ever received was ___."</div>
+          <div class="answer-row"><span>"a single sock, gift-wrapped"</span><button class="vote-btn">Vote</button></div>
+          <div class="answer-row"><span>"a motivational calendar from 2019"</span><button class="vote-btn">Vote</button></div>
+          <div class="answer-row"><span>"my own name spelled wrong on a mug"</span><button class="vote-btn">Vote</button></div>
+          <div style="margin-top:14px;">
+            <span class="chip"><span class="chip-dot" style="background:var(--status-warning)"></span>🎮 Just for fun — never affects your profile</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="screen" id="s-settings">
+        <h1 class="screen-title">Settings</h1>
+        <div class="card">
+          <div class="section-label" style="margin-top:0;">Twin chat AI</div>
+          <div class="radio-row"><div class="radio-dot sel"></div><span>Claude (default while credit lasts)</span></div>
+          <div class="radio-row"><div class="radio-dot"></div><span>OpenRouter — free tier</span></div>
+        </div>
+        <div class="card">
+          <div class="switch-row">
+            <div><b>Freeze profile</b><div style="font-size:12px;color:var(--muted);">Stop all sources — quiz, games, everything — from moving your traits.</div></div>
+            <div class="switch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+          </div>
+          <div class="switch-row">
+            <div><b>Allow party-game answers to ever be reviewed for scoring</b><div style="font-size:12px;color:var(--muted);">Off by default — see System overview.</div></div>
+            <div class="switch"><div class="knob"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="btn-row"><button class="btn">Export my data</button><button class="btn">Delete my data</button></div>
+        </div>
+      </section>
+
+      <!-- SYSTEM OVERVIEW -->
+      <section class="screen" id="s-overview">
+        <h1 class="screen-title">How it works</h1>
+        <p class="screen-sub">Same pipeline for every input — quiz, game, or upload.</p>
+        <div class="card">
+          <div class="flow">
+            <div class="flow-box"><b>Input</b>quiz · writing sample · games</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><b>Adapter</b>same shape: dim, direction, strength</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><b>Gate</b>allowed? capped how much?</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box locked-box"><b>Scoring engine</b>locked, unchanged</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><b>Profile</b>one computed record</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><b>Twin + results</b>outputs</div>
+          </div>
+          <table class="tier-table">
+            <tr><th>Source</th><th>Touches profile?</th><th>Cap</th></tr>
+            <tr><td>Quiz (IPIP / DOSPERT / etc.)</td><td>Yes</td><td>Full range</td></tr>
+            <tr><td>Writing sample</td><td>Yes</td><td>Capped moderate</td></tr>
+            <tr><td>Guess-your-twin</td><td>Yes</td><td>Reinforce existing direction only</td></tr>
+            <tr><td>New personality games</td><td>No, until checked</td><td>Display-only until validated</td></tr>
+            <tr><td>Party games (Quiplash-style)</td><td>No</td><td>Always display-only</td></tr>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const dims = [
+    ["Openness", "Familiar", "Novel", 0.78, 0.81, false],
+    ["Conscientiousness", "Spontaneous", "Structured", 0.62, 0.55, false],
+    ["Extraversion", "Reserved", "Outgoing", 0.35, 0.68, false],
+    ["Agreeableness", "Blunt", "Accommodating", 0.71, 0.74, false],
+    ["Neuroticism", "Steady", "Reactive", 0.44, 0.29, true],
+    ["Risk tolerance", "Cautious", "Bold", 0.58, 0.62, false],
+    ["Analytical detail", "Big-picture", "Detail-first", 0.69, 0.71, false],
+    ["Ambiguity tolerance", "Wants clarity", "Comfortable unclear", 0.40, 0.33, true],
+    ["Verbosity", "Brief", "Elaborate", 0.66, 0.58, false],
+    ["Directness", "Diplomatic", "Blunt", 0.73, 0.65, false],
+    ["Formality", "Casual", "Formal", 0.30, 0.52, false],
+    ["Humor dryness", "Warm", "Deadpan", 0.81, 0.77, false],
+  ];
+  const grid = document.getElementById("trait-grid");
+  dims.forEach(([name, lo, hi, val, conf, low]) => {
+    const row = document.createElement("div");
+    row.className = "meter-row" + (low ? " dim" : "");
+    row.innerHTML = `
+      <div class="meter-labels"><span>${name}</span><span>${lo} ↔ ${hi}</span></div>
+      <div class="meter-track"><div class="meter-fill" style="width:${val*100}%"></div></div>
+      <div class="meter-meta">
+        <span>${low ? "Still forming — needs more answers" : Math.round(val*100)+"% toward "+hi}</span>
+        <span>${Math.round(conf*100)}% confidence</span>
+      </div>`;
+    grid.appendChild(row);
+  });
+
+  function activateScreen(id, label) {
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    const navBtn = document.querySelector(`.nav-item[data-target="${id}"]`);
+    if (navBtn) navBtn.classList.add("active");
+    document.getElementById(id).classList.add("active");
+    document.getElementById("topbar-title").textContent = label || (navBtn ? navBtn.textContent : id);
+  }
+  function go(id) { activateScreen(id); }
+
+  document.querySelectorAll(".nav-item").forEach(btn => {
+    btn.addEventListener("click", () => activateScreen(btn.dataset.target, btn.textContent));
+  });
+
+  function toggleTheme() {
+    const root = document.documentElement;
+    const current = root.getAttribute("data-theme");
+    root.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+  }
+
+  // --- Home: name capture ---
+  let userName = "";
+  function setName() {
+    const val = document.getElementById("name-input").value.trim();
+    if (!val) return;
+    userName = val;
+    document.getElementById("home-greeting-title").textContent = `Hey, ${userName} 👋`;
+    document.getElementById("name-row").style.display = "none";
+  }
+
+  // --- Home: mini trait preview (reuses the same data as Results) ---
+  const homeDims = [dims[2], dims[0], dims[9], dims[11]]; // extraversion, openness, directness, humor dryness
+  const homeMini = document.getElementById("home-mini-meters");
+  homeDims.forEach(([name, lo, hi, val]) => {
+    const el = document.createElement("div");
+    el.className = "mini-meter";
+    el.innerHTML = `<label>${name}</label>
+      <div class="meter-track"><div class="meter-fill" style="width:${val*100}%"></div></div>`;
+    homeMini.appendChild(el);
+  });
+
+  // --- Home: simulate profile built / not built (mockup control only) ---
+  let simBuilt = false;
+  function toggleSim() {
+    simBuilt = !simBuilt;
+    document.getElementById("sim-switch").classList.toggle("on", simBuilt);
+    document.getElementById("sim-label").textContent = simBuilt ? "profile built" : "profile not built yet";
+    document.getElementById("home-profile-empty").style.display = simBuilt ? "none" : "block";
+    document.getElementById("home-profile-filled").style.display = simBuilt ? "block" : "none";
+    document.getElementById("home-game-guess-desc").textContent = simBuilt
+      ? "Predicts your answer, you confirm — reinforces what's already there."
+      : "Needs a profile first — this one calibrates against it.";
+    document.getElementById("home-game-guess-btn").disabled = !simBuilt;
+    document.getElementById("home-game-guess").classList.toggle("locked", !simBuilt);
+  }
+  toggleSim(); toggleSim(); // settle into the default (not-built) state via the same code path
+</script>
+</body>
+</html>
