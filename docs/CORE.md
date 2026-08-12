@@ -15,7 +15,8 @@
 - **Profile freeze:** a user can freeze their profile so nothing — including gate-approved sources — moves it further.
 - **No hardcoded content:** questions, dimension text, evidence-source config, game prompts/banks — anything a person reads or answers — lives as JSON under **`/core/content`**, never as literals inside component code. A screen or game reads its content from a file; it doesn't define it inline. One folder to find and edit anything.
 - **No hardcoded config either:** anything that can change independently of content — API keys, provider base URLs, **model names/versions**, free-tier limit numbers, timeouts — lives in environment variables or one `/api/config.ts`, never inline in a function. Model names change often (a provider renames or retires one, exactly like this project has seen mid-build) — a config edit should never require touching logic.
-- **Free-tier guardrail:** every outbound call to an LLM provider goes through a call-quota guard in `/api` first — checked against that provider's configured free-tier limit (or, for the Anthropic path, a hard daily-call cap protecting the credit balance). Over the cap: refuse gracefully ("twin's resting, try again later"), never call through and hope. Inbound abuse protection on `/twin/chat` uses `express-rate-limit` (free npm package, no new service).
+- **Free-tier guardrail:** every outbound call to an LLM provider — twin chat AND screenshot/writing-sample extraction — goes through a call-quota guard in `/api` first — checked against that provider's configured free-tier limit (or, for the Anthropic path, a hard daily-call cap protecting the credit balance). Over the cap: refuse gracefully ("twin's resting, try again later"), never call through and hope. Inbound abuse protection on `/twin/chat` uses `express-rate-limit` (free npm package, no new service).
+- **Media retention:** uploaded screenshots/exports are processed **transiently** — read into memory for the one request that extracts evidence from them, then discarded. Never written to disk or Supabase Storage. What's kept: the derived evidence (`{dim, direction, strength}`) and a short text description of what it said (e.g., "bio mentions hiking + dry humor"), not the image itself. This is what keeps storage tiny and free forever regardless of how many people use it — profiles and evidence logs are kilobytes each; images aren't kept at all. Max upload size capped (5MB) to keep each extraction call cheap and fast.
 - **No unbounded loops:** any retry (client or server) has a max-attempt cap, never infinite/unbounded. No polling anywhere in the design — the quiz has an explicit stop rule (Phase 3), and anything live (multiplayer, later) pushes updates via Supabase Realtime instead of polling.
 - **Folders:** `/core` (logic + tests, content in `/core/content`) · `/api` · `/web` · `/ios` (later) · `/validation` · `/docs`
 
@@ -39,3 +40,9 @@ engine through the Evidence Gate above — never a separate scoring path.
 Capped at `strength: "moderate"` max (never "strong"/"very strong") — text inference
 is noisier than a direct forced-choice answer. Only ever generated from data the
 profiled person explicitly provided or authorized (see Consent rule above).
+
+Repeatable, not one-time: someone can upload a new screenshot any time to keep
+sharpening their profile, same as a sharpen batch. Before extracting anything, the
+model checks whether the image actually has usable personal text (a bio, a caption,
+an about-me) — if not, it says so and suggests what to screenshot instead, once,
+rather than silently extracting nothing or looping the ask.

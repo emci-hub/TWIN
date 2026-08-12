@@ -32,6 +32,25 @@ and anything live later pushes updates instead of polling. Verified against
 the current phase list below; two fixes landed in Phase 5 as a result (the
 quota guard and the retry cap).
 
+**Methodology check (latest pass):** checked whether the forced-choice quiz is
+actually the best way to read someone, versus alternatives. Answer: the
+research backs combining methods, not picking one — self-report items
+(IPIP/DOSPERT/etc.) plus behavioral/text signal (writing samples) plus a light
+dose of situational-judgment items, which is what this plan already does via
+the Evidence Gate. One real addition: a handful of scenario-based
+("what would you do if...") items mixed into Phase 1 for the judgement-heavy
+dimensions, alongside the preference items — research on situational judgment
+tests shows they add signal in combination with self-report, not as a
+replacement for it.
+
+**Storage check (latest pass):** profiles and evidence logs are kilobytes per
+person — Supabase's free 500MB comfortably holds well over 100k users on that
+alone. The part that would actually blow the free tier is raw images. Fix:
+screenshots/exports are processed in memory and never stored — only the
+derived evidence and a one-line description survive the request. That's what
+makes "runs forever, free, and grows" actually true rather than aspirational.
+See Phase 5b below.
+
 ---
 
 ## Phase 0 — Setup
@@ -41,7 +60,7 @@ quota guard and the retry cap).
 
 ## Phase 1 — Dimensions & content
 
-Sources the trait content instead of writing it cold. Only 4 of 12 dimensions get new questions.
+Sources the trait content instead of writing it cold. Only 4 of 12 dimensions get new questions. A handful of scenario-based items are mixed in for the "judgement" side of things, not just preference items.
 
 ```
 Build Phase 1 (Dimensions & content) of TwinArchitect.
@@ -50,13 +69,14 @@ Build Phase 1 (Dimensions & content) of TwinArchitect.
    - openness, conscientiousness, extraversion, agreeableness, neuroticism: adapt from IPIP (ipip.ori.org).
    - risk_tolerance: adapt from DOSPERT. ambiguity_tolerance: adapt from MSTAT-II. analytical_detail: adapt from the Need for Cognition scale.
    - verbosity, directness, formality, humor_dryness: write ~4 custom forced-choice questions each (no published scale covers these).
-3. Tag every question with its source ("IPIP" / "DOSPERT" / "MSTAT-II" / "Need for Cognition" / "custom") and a weight-map entry: {dim, direction, strength}.
-4. Write /core/content/coverage.ts — prints question count per dimension.
+3. For risk_tolerance, ambiguity_tolerance, analytical_detail, directness: also write 2-3 short situational-judgment items each ("you're in [scenario] — do you A or B") alongside the trait-preference items above, same weight-map format. These sit next to the scale-adapted items, not instead of them — research on situational judgment tests finds they add real signal but work best combined with self-report, not alone.
+4. Tag every question with its source ("IPIP" / "DOSPERT" / "MSTAT-II" / "Need for Cognition" / "custom" / "situational") and a weight-map entry: {dim, direction, strength}.
+5. Write /core/content/coverage.ts — prints question count per dimension.
 Everything content-related goes in /core/content — nothing hardcoded in components later.
 Give complete files.
 ```
 
-**Test it:** run the coverage script. Confirm: 12 dimensions listed, each with ≥4 questions, 8 of the 12 show a real source name (not "custom").
+**Test it:** run the coverage script. Confirm: 12 dimensions listed, each with ≥4 questions, 8 of the 12 show a real source name (not "custom"), and the 4 targeted dimensions each have at least 2 situational items.
 
 ---
 
@@ -176,10 +196,27 @@ Give step-by-step instructions and any config files.
 |---|---|
 | Feedback ("does this feel like you") | `/core/content` — rating copy |
 | Guess-your-twin mini-game | `/core/content/guess-twin-bank.json` |
-| Social signal extractor (screenshot upload) | n/a — reads user-provided text |
+| Social signal extractor (screenshot upload) | see Phase 5b below — nothing persisted but the extracted evidence |
 | Party games (Quiplash-style) | `/core/content/party-prompts.json` |
 | Full accounts + validation suite | — |
 | iOS app | — |
 
 Same rule applies when we get here: game prompts and banks are JSON in
 `/core/content`, never hardcoded in a component.
+
+### Phase 5b — Social signal extractor (fully specified, still post-MVP)
+
+Repeatable screenshot/writing-sample upload. Guides people toward useful screenshots instead of silently failing on bad ones. Never stores the image.
+
+```
+Build Phase 5b (Social signal extractor) of TwinArchitect in /api.
+1. POST /signal/upload accepts one image (max 5MB) or pasted text, held in memory only — never written to disk or Supabase Storage.
+2. First AI call: does this contain personally-authored text worth reading (a bio, a caption, an about-me), yes/no + why. If no, return specific guidance ("try a screenshot of your bio, or a caption with some personal writing") and stop — one round, not a retry loop.
+3. If yes: extract {dim, direction, strength} evidence, source: "social_text", capped at moderate per docs/CORE.md. Pass through the Evidence Gate.
+4. Store only: the evidence produced, and a short text description of what the image said (one sentence). Discard the image/text immediately after the request completes.
+5. Route this call through the same quota guard as /twin/chat (docs/CORE.md's free-tier guardrail applies to this call too).
+6. Consent checkbox captured once per twin, not re-asked on every upload; a Settings toggle can revoke it.
+Give complete files.
+```
+
+**Test it:** upload a screenshot with no real text (e.g., a plain photo) — confirm it's rejected with specific guidance and nothing is stored. Upload one with a real bio — confirm evidence appears in the profile and no image bytes exist anywhere after the request finishes.
