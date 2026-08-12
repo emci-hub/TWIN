@@ -5,10 +5,14 @@
   "description": "TwinArchitect scoring engine, evidence gate, twin compiler, and content — imported by /api, never reimplemented elsewhere.",
   "type": "module",
   "scripts": {
-    "coverage": "tsx content/coverage.ts"
+    "coverage": "tsx content/coverage.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/node": "^22.5.0",
     "typescript": "^5.5.4",
-    "tsx": "^4.16.2"
+    "tsx": "^4.16.2",
+    "vitest": "^2.0.5"
   }
 }
