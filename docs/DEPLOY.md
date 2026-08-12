@@ -13,13 +13,30 @@ error handler in `api/server.ts` (see "A bug fixed for this phase" below).
 
 ## 0. Push to GitHub, if you haven't already
 
-Render and Vercel both deploy from a Git repo.
+Render and Vercel both deploy from a Git repo. There's no GitHub connector
+available in this build session (checked — not in the connector registry, and
+no `gh` CLI in this sandbox), so pick whichever of these two is easier for you:
 
+**Option A — do it yourself, on your own machine or github.com.** Create an
+empty repo at github.com/new (don't initialize it with a README/gitignore —
+this repo already has both), then from a terminal with this project's folder:
 ```
 cd twinarchitect
 git remote add origin https://github.com/<you>/twinarchitect.git
 git push -u origin master
 ```
+(Or use GitHub Desktop / VS Code's built-in GitHub integration if you'd rather
+not touch the command line — same end result.)
+
+**Option B — paste a token here and this session pushes it for you.**
+1. Create the empty repo at github.com/new (same as above — no README/gitignore).
+2. github.com/settings/tokens → **Generate new token (fine-grained)** → scope it
+   to just that one repo → under **Repository permissions**, set **Contents** to
+   **Read and write** → a short expiration (7 days is plenty) → generate.
+3. Paste the repo URL and the token into this chat. This session will run the
+   `git remote add` + `git push` above using that token, then you can revoke it
+   immediately afterward (**Settings → Developer settings → Tokens** →
+   delete) — it's only needed for the one push.
 
 (If you already have a remote set up, skip this — just make sure `master` is pushed.)
 
