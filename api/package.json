@@ -1,0 +1,29 @@
+{
+  "name": "@twinarchitect/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TwinArchitect API — Node + Express. Imports /core for all scoring/twin logic, never reimplements it.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:http": "tsx scripts/test-full-quiz.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.0",
+    "@types/pg": "^8.11.6",
+    "typescript": "^5.5.4",
+    "tsx": "^4.16.2",
+    "vitest": "^2.0.5"
+  }
+}
