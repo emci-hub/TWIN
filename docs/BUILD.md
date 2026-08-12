@@ -82,6 +82,7 @@ Give complete files.
 ---
 
 ## Phase 2 — Scoring engine + Evidence Gate ⭐
+✅ Done. `/core/scoring.ts` (locked math), `/core/content/evidence-sources.json` (seeded with `quiz`), `/core/evidence-gate.ts` (source trust + a new per-answer 3-dimension cap), `/core/profile.ts` (ties gate + scoring together, adds contradiction tracking and profile freeze). 22 Vitest tests, all green; `tsc --noEmit` clean.
 
 The locked math, plus the gate that decides what's even allowed to reach it.
 
