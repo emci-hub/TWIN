@@ -3,31 +3,35 @@
    mockup defined. Kept here rather than reinvented in Tailwind so the real
    app matches the approved mockup exactly. See docs/BUILD.md Phase 6. */
 
-/* ============ MINIMAL (light, default) ============ */
+/* ============ DUSK (default alternate) — petrol twin of Neon ============
+   Not white, not void-black. Mid-tone teal dusk (Tokyo Night Storm /
+   Catppuccin Macchiato idea: a colored canvas that doesn't blow out).
+   Same cyan/magenta as Neon so it still feels like the same app. */
 :root {
-  color-scheme: light;
-  --page:           #eceae4;
-  --surface-1:      #f7f6f1;
-  --surface-2:      #efeee8;
-  --text-primary:   #14141a;
-  --text-secondary: #45454f;
-  --muted:          #6f6f79;
-  --gridline:       #d9d7cf;
-  --border:         rgba(20,20,26,0.13);
-  --series-1:       #2a78d6;
-  --series-2:       #b3390d;
-  --seq-150:        #d3e4fa;
-  --seq-300:        #6da7ec;
-  --seq-450:        #2a78d6;
-  --seq-600:        #184f95;
-  --status-good:    #0ca30c;
-  --status-warning: #b45309;
-  --status-serious: #c2410c;
-  --status-critical:#d03b3b;
-  --accent-glow:    none;
-  --brand-grad:     linear-gradient(135deg, #2a78d6, #184f95);
-  --label-tracking: 0.04em;
-  --on-accent:      #ffffff;
+  color-scheme: dark;
+  --page:           #1a2c34;
+  --surface-1:      #243840;
+  --surface-2:      #2c4450;
+  --text-primary:   #e4f4f7;
+  --text-secondary: #b4d0d6;
+  --muted:          #87a8b0;
+  --gridline:       #355660;
+  --border:         rgba(34, 211, 238, 0.16);
+  --series-1:       #22d3ee;
+  --series-2:       #f0399a;
+  --seq-150:        #1e4a54;
+  --seq-300:        #12849c;
+  --seq-450:        #22d3ee;
+  --seq-600:        #7ce8f7;
+  --status-good:    #39e37d;
+  --status-warning: #ffb020;
+  --status-serious: #ff7a45;
+  --status-critical:#ff5c5c;
+  --accent-glow:    0 0 0 1px rgba(34,211,238,0.38), 0 0 14px rgba(34,211,238,0.14);
+  --brand-grad:     linear-gradient(135deg, #22d3ee, #f0399a);
+  --label-tracking: 0.09em;
+  --on-accent:      #06131a;
+  --grid-overlay:   rgba(34, 211, 238, 0.06);
 }
 
 /* ============ NEON (dark, cyberpunk/streetwear) ============ */
@@ -56,6 +60,7 @@
     --brand-grad:     linear-gradient(135deg, #22d3ee, #f0399a);
     --label-tracking: 0.09em;
     --on-accent:      #06131a;
+    --grid-overlay:   rgba(34,211,238,0.05);
   }
 }
 :root[data-theme="dark"] {
@@ -82,6 +87,7 @@
   --brand-grad:     linear-gradient(135deg, #22d3ee, #f0399a);
   --label-tracking: 0.09em;
   --on-accent:      #06131a;
+  --grid-overlay:   rgba(34,211,238,0.05);
 }
 
 * { box-sizing: border-box; }
@@ -89,18 +95,16 @@ html, body { margin: 0; padding: 0; }
 body {
   font-family: 'Manrope', system-ui, -apple-system, "Segoe UI", sans-serif;
   background: var(--page);
+  background-image:
+    linear-gradient(var(--grid-overlay) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-overlay) 1px, transparent 1px);
+  background-size: 42px 42px;
   color: var(--text-primary);
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
 }
 #root { display: flex; min-height: 100vh; }
 .app-root { display: flex; min-height: 100vh; width: 100%; transition: background .2s; }
-:root[data-theme="dark"] body {
-  background-image:
-    linear-gradient(rgba(34,211,238,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34,211,238,0.05) 1px, transparent 1px);
-  background-size: 42px 42px;
-}
 h1, h2, .brand-name, .nav-group-label, .screen-title {
   font-family: 'Space Grotesk', 'Manrope', system-ui, sans-serif;
 }
@@ -236,7 +240,7 @@ h1.screen-title { font-size: 21px; margin: 0 0 4px; font-weight: 700; }
 }
 .chat-scroll { display:flex; flex-direction:column; gap:10px; margin-bottom: 14px; max-height: 420px; overflow-y: auto; }
 .bubble { max-width: 72%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height:1.45; white-space: pre-wrap; }
-.bubble.user { align-self:flex-end; background: var(--series-1); color:#fff; border-bottom-right-radius:4px; }
+.bubble.user { align-self:flex-end; background: var(--series-1); color: var(--on-accent); border-bottom-right-radius:4px; }
 .bubble.twin { align-self:flex-start; background: var(--page); border:1px solid var(--border); border-bottom-left-radius:4px; }
 .bubble.system { align-self:center; background: transparent; border:1px dashed var(--border); color: var(--muted); font-size:12px; }
 .chat-input-row { display:flex; gap:8px; }
@@ -263,7 +267,7 @@ h1.screen-title { font-size: 21px; margin: 0 0 4px; font-weight: 700; }
 .radio-dot { width:16px; height:16px; border-radius:50%; border:1.5px solid var(--border); flex-shrink:0; position:relative; }
 .radio-dot.sel::after { content:""; position:absolute; inset:3px; border-radius:50%; background: var(--series-1); }
 
-.section-label { font-size: 12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color: var(--muted); margin: 18px 0 8px; }
+.section-label { font-size: 12px; font-weight:600; text-transform:uppercase; letter-spacing: var(--label-tracking); color: var(--muted); margin: 18px 0 8px; }
 
 /* Home */
 .home-greeting { display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px; flex-wrap:wrap; gap:10px; }

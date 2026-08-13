@@ -24,7 +24,7 @@ export function Topbar({
       <div className="topbar-right">
         <span className="pill">Anonymous session — stored on this device only</span>
         <button className="theme-btn" onClick={onToggleTheme}>
-          {theme === "dark" ? "○ Minimal" : "✦ Neon"}
+          {theme === "dark" ? "○ Dusk" : "✦ Neon"}
         </button>
       </div>
     </div>
