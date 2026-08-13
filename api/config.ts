@@ -66,6 +66,12 @@ export const TWIN_CHAT_MAX_MESSAGE_LENGTH = Number(
   process.env.TWIN_CHAT_MAX_MESSAGE_LENGTH ?? 500,
 );
 
+// Cap on pasted text length for the "AI read" (social-read) feature — a
+// separate limit from TWIN_CHAT_MAX_MESSAGE_LENGTH since a bio/messages
+// paste is naturally longer than one chat message, but still bounded so a
+// request can't balloon the provider call.
+export const SOCIAL_READ_MAX_LENGTH = Number(process.env.SOCIAL_READ_MAX_LENGTH ?? 6000);
+
 // Inbound abuse protection on /twin/chat (express-rate-limit) — separate
 // concern from the outbound quota guard above; this caps how often ONE
 // client can hit the route at all, regardless of provider quota.

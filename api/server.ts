@@ -9,7 +9,13 @@ import { QuizSession, compileTwinPrompt, QUESTION_BANK, DIMENSIONS_CONTENT } fro
 import type { Store, StoredAnswer } from "./store.js";
 import { checkAndReserveQuota } from "./quota-guard.js";
 import { generateTwinReply, isKnownProvider } from "./llm/index.js";
-import { ACTIVE_PROVIDER, TWIN_CHAT_MAX_MESSAGE_LENGTH, INBOUND_RATE_LIMIT } from "./config.js";
+import { generateSocialRead } from "./llm/social-read.js";
+import {
+  ACTIVE_PROVIDER,
+  TWIN_CHAT_MAX_MESSAGE_LENGTH,
+  INBOUND_RATE_LIMIT,
+  SOCIAL_READ_MAX_LENGTH,
+} from "./config.js";
 import { asyncHandler } from "./async-handler.js";
 
 /**
@@ -66,6 +72,17 @@ export function createServer(store: Store): Express {
   app.use(express.json({ limit: "100kb" }));
 
   const twinChatLimiter = rateLimit({
+    windowMs: INBOUND_RATE_LIMIT.window_ms,
+    limit: INBOUND_RATE_LIMIT.max_requests,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "too many requests — slow down and try again shortly" },
+  });
+
+  // Same inbound-abuse shape as twinChatLimiter, kept as its own instance
+  // (rate-limit state is per-route) — /twin/social-read is a separate
+  // feature but hits the same kind of provider call.
+  const socialReadLimiter = rateLimit({
     windowMs: INBOUND_RATE_LIMIT.window_ms,
     limit: INBOUND_RATE_LIMIT.max_requests,
     standardHeaders: true,
@@ -278,6 +295,56 @@ export function createServer(store: Store): Express {
       } catch (err) {
         res.status(502).json({
           error: "the twin's AI provider failed to respond — try again shortly",
+          detail: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }),
+  );
+
+  // "AI read" — analyzes text a user pastes about themselves (their own
+  // bio/messages/posts) into a read across the same 12 dimensions, entirely
+  // separate from the quiz. No session_id, and nothing here is ever
+  // persisted server-side — the pasted text and the resulting read live
+  // only in this response. Consent is a required, explicit field (not just
+  // a client-side checkbox) so the "only your own content" rule has a real
+  // enforcement point, even though it can't verify authorship itself.
+  app.post(
+    "/twin/social-read",
+    socialReadLimiter,
+    asyncHandler(async (req, res) => {
+      const { text, consent, provider } = req.body ?? {};
+
+      if (consent !== true) {
+        res.status(400).json({
+          error: "consent is required — this feature is for analyzing your own content only",
+        });
+        return;
+      }
+      if (typeof text !== "string" || text.trim().length === 0) {
+        res.status(400).json({ error: "text is required" });
+        return;
+      }
+      if (text.length > SOCIAL_READ_MAX_LENGTH) {
+        res.status(400).json({ error: `text too long — max ${SOCIAL_READ_MAX_LENGTH} characters` });
+        return;
+      }
+      if (provider !== undefined && !isKnownProvider(provider)) {
+        res.status(400).json({ error: `unknown provider "${provider}"` });
+        return;
+      }
+
+      const quota = checkAndReserveQuota(provider);
+      if (!quota.allowed) {
+        res.status(429).json({ error: "AI read is resting, try again shortly", reason: quota.reason });
+        return;
+      }
+
+      try {
+        const result = await generateSocialRead(text, provider);
+        res.json(result);
+      } catch (err) {
+        res.status(502).json({
+          error: "the AI read's provider failed to respond — try again shortly",
           detail: err instanceof Error ? err.message : String(err),
         });
       }

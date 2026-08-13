@@ -2,6 +2,23 @@ import { CONFIDENCE_THRESHOLD } from "../lib/constants";
 import { leanDescription, sureLabel } from "../lib/profileMath";
 import type { DimensionProfile } from "../lib/api";
 
+/**
+ * Full trait-grid row. Grayed out below the twin compiler's own 0.35
+ * confidence gate (docs/CORE.md) — same threshold the twin prompt itself
+ * uses to decide whether to voice a trait at all.
+ *
+ * Two content choices worth explaining, both made after a real person
+ * looked at this screen and couldn't parse it:
+ * 1. The name and the low↔high axis text are on their own line each
+ *    (.meter-name / .meter-axis, stacked, not two same-line spans) —
+ *    previously two adjacent <span>s relying on flex space-between to
+ *    separate them, which rendered as one run-on word ("OpennessPrefers
+ *    the familiar...") when that flex rule didn't apply. Stacking removes
+ *    the failure mode entirely instead of just patching the CSS.
+ * 2. "54% toward X" / "36% confidence" is stats-readout language — see
+ *    leanDescription()/sureLabel() in lib/profileMath.ts for why those
+ *    were replaced with plain sentences.
+ */
 export function TraitMeter({
   label,
   low,

@@ -8,6 +8,7 @@ import { Quiz } from "./screens/Quiz";
 import { Results } from "./screens/Results";
 import { Why } from "./screens/Why";
 import { Chat } from "./screens/Chat";
+import { SocialRead } from "./screens/SocialRead";
 import { Settings } from "./screens/Settings";
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           {screen === "results" && <Results />}
           {screen === "why" && <Why />}
           {screen === "chat" && <Chat />}
+          {screen === "social-read" && <SocialRead />}
           {screen === "settings" && <Settings />}
         </div>
       </div>

@@ -399,6 +399,96 @@ describe("POST /twin/chat", () => {
   });
 });
 
+describe("POST /twin/social-read", () => {
+  it("returns a placeholder read from the mock provider, clearly labeled as such", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/twin/social-read`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: "I love trying new restaurants and meeting new people.", consent: true }),
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.provider).toBe("mock");
+      expect(Object.keys(body.read)).toContain("openness");
+      expect(body.read.openness.note).toMatch(/mock/i);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("rejects a request without explicit consent", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/twin/social-read`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: "some bio text" }),
+      });
+      expect(res.status).toBe(400);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("rejects empty text", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/twin/social-read`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: "   ", consent: true }),
+      });
+      expect(res.status).toBe(400);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("rejects text over the configured length cap", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/twin/social-read`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: "a".repeat(10_000), consent: true }),
+      });
+      expect(res.status).toBe(400);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("rejects an unrecognized provider value", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/twin/social-read`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: "hi", consent: true, provider: "totally-not-a-provider" }),
+      });
+      expect(res.status).toBe(400);
+    } finally {
+      server.close();
+    }
+  });
+
+  it("requires no session_id — this feature never touches a stored profile", async () => {
+    const { server, baseUrl } = await startEphemeral(app);
+    try {
+      const res = await fetch(`${baseUrl}/twin/social-read`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: "just some text", consent: true }),
+      });
+      expect(res.status).toBe(200);
+    } finally {
+      server.close();
+    }
+  });
+});
+
 describe("global error handling (Phase 7 — errors must be logged, never hang)", () => {
   // Express 4 doesn't catch a rejected promise thrown out of an async route
   // handler on its own — without the asyncHandler wrapper + global error

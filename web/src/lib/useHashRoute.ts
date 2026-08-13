@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 
-export type ScreenId = "home" | "quiz" | "results" | "why" | "chat" | "settings";
+export type ScreenId = "home" | "quiz" | "results" | "why" | "chat" | "social-read" | "settings";
 
-const VALID: ScreenId[] = ["home", "quiz", "results", "why", "chat", "settings"];
+const VALID: ScreenId[] = ["home", "quiz", "results", "why", "chat", "social-read", "settings"];
 const DEFAULT_SCREEN: ScreenId = "home";
 
 function readHash(): ScreenId {

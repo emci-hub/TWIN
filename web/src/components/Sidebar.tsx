@@ -13,10 +13,13 @@ interface NavGroup {
 
 /**
  * Only the screens this phase actually built. docs/mockup.html also shows
- * Guess-your-twin, Social upload, Feedback, Multiplayer, and System
- * overview — those stay mockup-only until their own post-MVP phases
- * (docs/BUILD.md's "After the MVP" table) actually build them, rather than
- * shipping nav links to screens with no real functionality behind them.
+ * Guess-your-twin, Feedback, Multiplayer, and System overview — those stay
+ * mockup-only until their own post-MVP phases (docs/BUILD.md's "After the
+ * MVP" table) actually build them, rather than shipping nav links to
+ * screens with no real functionality behind them. "AI read" below is the
+ * real, built version of what the mockup called Social upload — kept in
+ * its own nav group, deliberately separate from "See it" (the quiz-based
+ * profile), so it never reads as part of the twin's real profile.
  */
 function quizLabel(phase: string | null, done: boolean): string {
   if (done) return "Quiz complete";
@@ -35,6 +38,7 @@ const GROUPS: (quizLabel: string) => NavGroup[] = (quizLabel) => [
       { id: "chat", label: "Twin chat" },
     ],
   },
+  { label: "Try something new", items: [{ id: "social-read", label: "AI read" }] },
   { label: "Manage", items: [{ id: "settings", label: "Settings" }] },
 ];
 

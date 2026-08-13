@@ -147,6 +147,19 @@ export interface ChatResult {
   model: string;
 }
 
+export interface SocialReadEntry {
+  value: number;
+  note: string;
+}
+
+export type SocialRead = Record<string, SocialReadEntry>;
+
+export interface SocialReadResult {
+  read: SocialRead;
+  provider: string;
+  model: string;
+}
+
 export type LlmProvider = "anthropic" | "openrouter" | "mock";
 
 export interface DimensionCopy {
@@ -191,6 +204,15 @@ export const api = {
     return request<ChatResult>("/twin/chat", {
       method: "POST",
       body: JSON.stringify({ session_id: sessionId, message, provider }),
+    });
+  },
+
+  // Deliberately no session_id — this never touches a stored profile, and
+  // nothing sent here is persisted server-side (see /api/server.ts).
+  socialRead(text: string, consent: boolean, provider?: LlmProvider): Promise<SocialReadResult> {
+    return request<SocialReadResult>("/twin/social-read", {
+      method: "POST",
+      body: JSON.stringify({ text, consent, provider }),
     });
   },
 };

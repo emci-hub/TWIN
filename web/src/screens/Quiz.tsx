@@ -15,6 +15,11 @@ const STOP_REASON_COPY: Record<string, string> = {
   bank_exhausted: "You've answered every question available right now.",
 };
 
+// Matches the CSS transition-duration on .quiz-card's states in theme.css
+// — one constant so the JS hold time and the CSS animation can't drift
+// apart. Kept short and identical no matter which option was tapped or how
+// fast the network responds (see pick() below) — the point is a snappier
+// feel, never a signal about the answer itself.
 const TRANSITION_MS = 180;
 
 type View = { kind: "loading" } | { kind: "complete" } | { kind: "question"; question: Question };
@@ -23,12 +28,19 @@ export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
   const { profile, phase, batch, done, stopReason, frozen, roundSize, submitAnswer, loading, error } =
     useSession();
 
+  // The visible question is intentionally decoupled from the live `batch`
+  // — it only advances through pick() below, on our own timing, so there's
+  // always something on screen to play the exit/enter transition against
+  // instead of the text just snapping to the next question mid-animation.
   const [view, setView] = useState<View>({ kind: "loading" });
   const [progress, setProgress] = useState({ answeredInRound: 0, roundStartSize: 0 });
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [cardPhase, setCardPhase] = useState<"visible" | "exiting" | "entering">("visible");
   const [hasSynced, setHasSynced] = useState(false);
 
+  // Always-current refs for batch/done/roundSize, so pick() (below) can
+  // read the freshest values after an await without relying on a stale
+  // closure — see the comment inside pick() for why this is needed.
   const batchRef = useRef(batch);
   const doneRef = useRef(done);
   const roundSizeRef = useRef(roundSize);
@@ -38,6 +50,9 @@ export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
     roundSizeRef.current = roundSize;
   }, [batch, done, roundSize]);
 
+  // Sync once, the first time real data is available (initial load, or a
+  // resumed session) — after that, `view`/`progress` only change through
+  // pick() below, so the animation timing stays fully under our control.
   useEffect(() => {
     if (!hasSynced && !loading && profile) {
       const roundStartSize = roundSize || batch.length;
@@ -71,17 +86,39 @@ export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
     if (view.kind !== "question" || selectedOptionId) return;
     const question = view.question;
 
+    // Instant, uniform feedback the moment you tap — identical treatment
+    // for whichever option was picked (only optionId differs, never the
+    // animation/copy), then the card holds for a fixed beat before
+    // advancing so the tap always feels acknowledged, not just skipped
+    // past. Deliberately answer-agnostic throughout — research on gamified
+    // surveys ties per-answer-differentiated feedback to response bias, so
+    // nothing here (timing, motion, copy) is allowed to vary by which
+    // option was picked.
     setSelectedOptionId(optionId);
     setCardPhase("exiting");
 
+    // Run the real request and the minimum hold time in parallel — a fast
+    // network doesn't shortcut the animation, and a slow one doesn't make
+    // it feel broken; either way the transition plays for the same
+    // TRANSITION_MS before the next question appears.
     try {
       await Promise.all([submitAnswer(question.id, optionId), new Promise((r) => setTimeout(r, TRANSITION_MS))]);
     } catch {
+      // submitAnswer() already recorded the failure in SessionContext (the
+      // error banner above is already showing it) — just restore the card
+      // instead of leaving it faded out and every option permanently
+      // disabled with no way to retry.
       setSelectedOptionId(null);
       setCardPhase("visible");
       return;
     }
 
+    // Read via ref, not the `batch`/`done`/`roundSize` captured in this
+    // closure at render time — submitAnswer() above resolves only after
+    // SessionContext's refresh() has already updated those, but this
+    // async function still holds the values from when pick() was called,
+    // not the live ones. The refs (kept current by the effect above) give
+    // us the post-refresh state instead of a stale snapshot.
     const nextBatch = batchRef.current;
     const nextRoundStartSize = roundSizeRef.current || nextBatch.length;
     setProgress({
@@ -91,6 +128,10 @@ export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
     setView(nextBatch.length > 0 ? { kind: "question", question: nextBatch[0] } : { kind: "complete" });
     setSelectedOptionId(null);
 
+    // Two-step class flip: render the new card already in its "entering"
+    // (invisible, offset) CSS state with no transition, then flip to
+    // "visible" on the next frame so the browser actually animates the
+    // change instead of the state swap happening instantaneously.
     setCardPhase("entering");
     requestAnimationFrame(() => requestAnimationFrame(() => setCardPhase("visible")));
   }
