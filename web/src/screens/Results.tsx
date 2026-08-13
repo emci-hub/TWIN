@@ -53,7 +53,8 @@ export function Results() {
         </div>
       </div>
       <p style={{ fontSize: 12, color: "var(--muted)" }}>
-        Grayed-out traits below just need a few more answers before the twin will use them — answer more questions any time to fill them in.
+        Grayed-out traits below just need a few more answers before the twin will use them —
+        answer more questions any time to fill them in.
       </p>
     </section>
   );

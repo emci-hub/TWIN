@@ -205,9 +205,29 @@ h1.screen-title { font-size: 21px; margin: 0 0 4px; font-weight: 700; }
   text-align:left; padding: 14px 16px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--page);
   color: var(--text-primary); font-size: 13.5px; cursor:pointer;
+  transition: opacity 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
 }
 .quiz-option:hover { border-color: var(--series-1); }
-.quiz-option:disabled { opacity: .6; cursor: not-allowed; }
+.quiz-option:disabled { cursor: not-allowed; }
+.quiz-option.selected { border-color: var(--series-1); background: var(--seq-150); box-shadow: var(--accent-glow); opacity: 1; }
+.quiz-option.not-selected { opacity: .4; }
+
+.quiz-card-visible { opacity: 1; transform: translateY(0); transition: opacity 180ms ease, transform 180ms ease; }
+.quiz-card-exiting { opacity: 0; transform: translateY(-6px); transition: opacity 180ms ease, transform 180ms ease; }
+.quiz-card-entering { opacity: 0; transform: translateY(6px); }
+
+.quiz-complete-badge {
+  width: 52px; height: 52px; border-radius: 50%; margin: 4px auto 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--series-1); color: var(--on-accent); font-size: 22px; font-weight: 700;
+  box-shadow: var(--accent-glow);
+  animation: quiz-complete-pop 320ms ease;
+}
+@keyframes quiz-complete-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
 
 /* Chat */
 .chat-disclaimer {

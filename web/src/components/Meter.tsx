@@ -35,7 +35,6 @@ export function TraitMeter({
   );
 }
 
-/** Compact version for Home's 4-trait preview row. */
 export function MiniMeter({ label, dim }: { label: string; dim: DimensionProfile }) {
   return (
     <div className="mini-meter">

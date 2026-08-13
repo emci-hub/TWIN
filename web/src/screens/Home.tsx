@@ -6,7 +6,6 @@ import { overallConfidence, hasAnyEvidence } from "../lib/profileMath";
 import { clarityLabel } from "../lib/constants";
 import type { ScreenId } from "../lib/useHashRoute";
 
-// Same 4 traits docs/mockup.html's Home preview used.
 const PREVIEW_DIM_IDS = ["extraversion", "openness", "directness", "humor_dryness"];
 
 export function Home({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {

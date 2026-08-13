@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "../lib/SessionContext";
 import type { ScreenId } from "../lib/useHashRoute";
+import type { Question } from "../lib/api";
 
 const PHASE_TITLE: Record<string, string> = {
   quick_start: "Quick Start",
@@ -14,12 +15,39 @@ const STOP_REASON_COPY: Record<string, string> = {
   bank_exhausted: "You've answered every question available right now.",
 };
 
+const TRANSITION_MS = 180;
+
+type View = { kind: "loading" } | { kind: "complete" } | { kind: "question"; question: Question };
+
 export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
   const { profile, phase, batch, done, stopReason, frozen, roundSize, submitAnswer, loading, error } =
     useSession();
-  const [submittingOptionId, setSubmittingOptionId] = useState<string | null>(null);
 
-  if (loading || !profile) {
+  const [view, setView] = useState<View>({ kind: "loading" });
+  const [progress, setProgress] = useState({ answeredInRound: 0, roundStartSize: 0 });
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [cardPhase, setCardPhase] = useState<"visible" | "exiting" | "entering">("visible");
+  const [hasSynced, setHasSynced] = useState(false);
+
+  const batchRef = useRef(batch);
+  const doneRef = useRef(done);
+  const roundSizeRef = useRef(roundSize);
+  useEffect(() => {
+    batchRef.current = batch;
+    doneRef.current = done;
+    roundSizeRef.current = roundSize;
+  }, [batch, done, roundSize]);
+
+  useEffect(() => {
+    if (!hasSynced && !loading && profile) {
+      const roundStartSize = roundSize || batch.length;
+      setProgress({ answeredInRound: Math.max(0, roundStartSize - batch.length), roundStartSize });
+      setView(batch.length > 0 ? { kind: "question", question: batch[0] } : { kind: "complete" });
+      setHasSynced(true);
+    }
+  }, [hasSynced, loading, profile, batch, roundSize]);
+
+  if (loading || !profile || view.kind === "loading") {
     return (
       <section>
         <h1 className="screen-title">Quiz</h1>
@@ -39,14 +67,45 @@ export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
     );
   }
 
-  if (done || batch.length === 0) {
+  async function pick(optionId: string) {
+    if (view.kind !== "question" || selectedOptionId) return;
+    const question = view.question;
+
+    setSelectedOptionId(optionId);
+    setCardPhase("exiting");
+
+    try {
+      await Promise.all([submitAnswer(question.id, optionId), new Promise((r) => setTimeout(r, TRANSITION_MS))]);
+    } catch {
+      setSelectedOptionId(null);
+      setCardPhase("visible");
+      return;
+    }
+
+    const nextBatch = batchRef.current;
+    const nextRoundStartSize = roundSizeRef.current || nextBatch.length;
+    setProgress({
+      answeredInRound: Math.max(0, nextRoundStartSize - nextBatch.length),
+      roundStartSize: nextRoundStartSize,
+    });
+    setView(nextBatch.length > 0 ? { kind: "question", question: nextBatch[0] } : { kind: "complete" });
+    setSelectedOptionId(null);
+
+    setCardPhase("entering");
+    requestAnimationFrame(() => requestAnimationFrame(() => setCardPhase("visible")));
+  }
+
+  if (view.kind === "complete") {
     return (
       <section>
         <h1 className="screen-title">Quiz complete</h1>
         <p className="screen-sub">
           {stopReason ? STOP_REASON_COPY[stopReason] ?? "" : "Nothing left to answer right now."}
         </p>
-        <div className="card">
+        <div className={`card quiz-card quiz-card-${cardPhase}`}>
+          <div className="quiz-complete-badge" aria-hidden="true">
+            ✓
+          </div>
           <div className="btn-row">
             <button className="btn btn-primary" onClick={() => onNavigate("results")}>
               View results
@@ -60,23 +119,9 @@ export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
     );
   }
 
-  const question = batch[0];
-  // roundSize is the true, server-known size of the current round (Quick
-  // Start's config.quick_start_size, or config.sharpen_batch_size) — never
-  // derived from the live queue, so it stays correct across a page refresh
-  // (a rebuilt queue only ever reflects what's LEFT to answer).
-  const roundStartSize = roundSize || batch.length;
-  const answeredInRound = Math.max(0, roundStartSize - batch.length);
-  const progressPct = roundStartSize > 0 ? Math.round((answeredInRound / roundStartSize) * 100) : 0;
-
-  async function pick(optionId: string) {
-    setSubmittingOptionId(optionId);
-    try {
-      await submitAnswer(question.id, optionId);
-    } finally {
-      setSubmittingOptionId(null);
-    }
-  }
+  const question = view.question;
+  const progressPct =
+    progress.roundStartSize > 0 ? Math.round((progress.answeredInRound / progress.roundStartSize) * 100) : 0;
 
   return (
     <section>
@@ -85,28 +130,32 @@ export function Quiz({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
 
       {error && <div className="banner banner-error">{error}</div>}
 
-      <div className="card">
+      <div className={`card quiz-card quiz-card-${cardPhase}`}>
         <div className="quiz-progress">
           <span className="chip">{phase === "sharpen" ? "Sharpening" : "Quick Start"}</span>
           <div className="bar">
             <div style={{ width: `${progressPct}%` }} />
           </div>
           <span style={{ fontSize: 12, color: "var(--muted)" }}>
-            {answeredInRound + 1} of {roundStartSize}
+            {progress.answeredInRound + 1} of {progress.roundStartSize}
           </span>
         </div>
         <div className="quiz-question">{question.prompt}</div>
         <div className="quiz-options">
-          {question.options.map((option) => (
-            <button
-              key={option.id}
-              className="quiz-option"
-              disabled={submittingOptionId !== null}
-              onClick={() => pick(option.id)}
-            >
-              {submittingOptionId === option.id ? "Saving…" : option.text}
-            </button>
-          ))}
+          {question.options.map((option) => {
+            const isSelected = selectedOptionId === option.id;
+            const isOther = selectedOptionId !== null && !isSelected;
+            return (
+              <button
+                key={option.id}
+                className={`quiz-option${isSelected ? " selected" : ""}${isOther ? " not-selected" : ""}`}
+                disabled={selectedOptionId !== null}
+                onClick={() => pick(option.id)}
+              >
+                {option.text}
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>
