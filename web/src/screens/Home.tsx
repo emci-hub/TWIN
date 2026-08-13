@@ -17,7 +17,6 @@ export function Home({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
 
   const filled = hasAnyEvidence(profile);
   const clarity = profile ? clarityLabel(overallConfidence(profile)) : "Sketch";
-  const overallPct = profile ? Math.round(overallConfidence(profile) * 100) : 0;
 
   function saveName() {
     const trimmed = draftName.trim();
@@ -78,7 +77,7 @@ export function Home({ onNavigate }: { onNavigate: (id: ScreenId) => void }) {
           <div className="profile-summary-top">
             <span className="chip">
               <span className="chip-dot" style={{ background: "var(--series-1)" }} />
-              Clarity: {clarity} · {overallPct}% overall
+              Clarity: {clarity}
             </span>
             <div className="btn-row">
               <button className="btn" onClick={() => onNavigate("results")}>

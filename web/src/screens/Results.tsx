@@ -2,7 +2,7 @@ import { useSession } from "../lib/SessionContext";
 import { useDimensions } from "../lib/useDimensions";
 import { TraitMeter } from "../components/Meter";
 import { overallConfidence, hasAnyEvidence } from "../lib/profileMath";
-import { clarityLabel } from "../lib/constants";
+import { clarityLabel, clarityHint } from "../lib/constants";
 
 export function Results() {
   const { profile, name, loading } = useSession();
@@ -31,7 +31,7 @@ export function Results() {
   }
 
   const clarity = clarityLabel(overallConfidence(profile));
-  const overallPct = Math.round(overallConfidence(profile) * 100);
+  const hint = clarityHint(overallConfidence(profile));
 
   return (
     <section>
@@ -39,8 +39,9 @@ export function Results() {
       <p className="screen-sub">
         <span className="chip">
           <span className="chip-dot" style={{ background: "var(--series-1)" }} />
-          Clarity: {clarity} · {overallPct}% overall
-        </span>
+          Clarity: {clarity}
+        </span>{" "}
+        {hint}
       </p>
       <div className="card">
         <div className="trait-grid">
@@ -52,7 +53,7 @@ export function Results() {
         </div>
       </div>
       <p style={{ fontSize: 12, color: "var(--muted)" }}>
-        Grayed rows are below the confidence floor — the twin won't voice these yet.
+        Grayed-out traits below just need a few more answers before the twin will use them — answer more questions any time to fill them in.
       </p>
     </section>
   );
